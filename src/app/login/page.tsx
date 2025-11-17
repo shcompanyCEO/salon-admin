@@ -6,8 +6,9 @@ import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
-import { authApi } from '@/lib/api';
+import { useLogin } from '@/lib/api/mutations';
 import { Scissors } from 'lucide-react';
+import { ApiResponse, User } from '@/types';
 
 interface LoginForm {
   email: string;
@@ -15,10 +16,14 @@ interface LoginForm {
   rememberMe: boolean;
 }
 
+interface LoginResponse {
+  user: User;
+  token: string;
+}
+
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuthStore();
-  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
   const {
@@ -27,25 +32,24 @@ export default function LoginPage() {
     formState: { errors },
   } = useForm<LoginForm>();
 
-  const onSubmit = async (data: LoginForm) => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      const response = await authApi.login(data.email, data.password);
-
+  const loginMutation = useLogin({
+    onSuccess: (response: ApiResponse<LoginResponse>) => {
       if (response.success && response.data) {
-        login(response.data?.user, response.data?.token);
+        login(response.data.user, response.data.token);
         router.push('/dashboard');
       } else {
         setError(response.error || '로그인에 실패했습니다');
       }
-    } catch (err) {
+    },
+    onError: (err: Error) => {
       setError('로그인 중 오류가 발생했습니다');
       console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
-    }
+    },
+  });
+
+  const onSubmit = async (data: LoginForm) => {
+    setError('');
+    loginMutation.mutate({ email: data.email, password: data.password });
   };
 
   return (
@@ -125,7 +129,7 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               className="w-full"
-              isLoading={isLoading}
+              isLoading={loginMutation.isPending}
             >
               로그인
             </Button>

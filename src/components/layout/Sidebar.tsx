@@ -114,9 +114,8 @@ export const Sidebar: React.FC = () => {
       {/* Sidebar */}
       <aside
         className={cn(
-          'fixed top-0 left-0 z-50 h-screen bg-white border-r border-secondary-200 transition-transform duration-300',
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full',
-          'lg:translate-x-0 lg:static'
+          'fixed top-0 left-0 z-50 h-screen bg-white border-r border-secondary-200 transition-transform duration-300 lg:relative',
+          isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
         style={{ width: '280px' }}
       >

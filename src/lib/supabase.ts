@@ -9,6 +9,42 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export type Database = {
   public: {
     Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+          name: string;
+          phone: string;
+          role: 'SUPER_ADMIN' | 'SALON_MANAGER' | 'DESIGNER' | 'CUSTOMER';
+          salon_id: string | null;
+          profile_image: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          email: string;
+          name: string;
+          phone?: string;
+          role?: 'SUPER_ADMIN' | 'SALON_MANAGER' | 'DESIGNER' | 'CUSTOMER';
+          salon_id?: string | null;
+          profile_image?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          email?: string;
+          name?: string;
+          phone?: string;
+          role?: 'SUPER_ADMIN' | 'SALON_MANAGER' | 'DESIGNER' | 'CUSTOMER';
+          salon_id?: string | null;
+          profile_image?: string | null;
+          is_active?: boolean;
+          updated_at?: string;
+        };
+      };
       customers: {
         Row: {
           id: string;

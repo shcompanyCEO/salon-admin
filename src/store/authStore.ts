@@ -27,11 +27,18 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
+        // 상태 초기화
         set({
           user: null,
           token: null,
           isAuthenticated: false,
         });
+
+        // localStorage에서 인증 정보 완전 삭제
+        localStorage.removeItem('auth-storage');
+
+        // 다른 관련 localStorage 항목도 삭제 (필요시)
+        // localStorage.clear(); // 모든 localStorage를 삭제하려면 이것 사용
       },
 
       updateUser: (userData) => {

@@ -11,6 +11,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",
     "@supabase/supabase-js": "^2.81.1",
+    "@tanstack/react-query": "^5.90.10",
     "clsx": "^2.1.0",
     "date-fns": "^3.0.0",
     "lucide-react": "^0.344.0",
@@ -24,6 +25,7 @@
     "zustand": "^4.5.0"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.90.2",
     "@types/node": "^20.11.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",

@@ -1,14 +1,13 @@
 import React from 'react';
 import { Menu, Bell, Globe, LogOut } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
-import { useAuthStore } from '@/store/authStore';
+import { useLogout } from '@/lib/api/mutations';
 import { useTranslation } from '@/locales/useTranslation';
 import { Locale } from '@/types';
 import { useRouter } from 'next/navigation';
 
 export const Header: React.FC = () => {
   const { toggleSidebar, locale, setLocale } = useUIStore();
-  const { logout } = useAuthStore();
   const { t } = useTranslation();
   const router = useRouter();
 
@@ -21,9 +20,14 @@ export const Header: React.FC = () => {
     { code: 'th' as Locale, name: 'ภาษาไทย' },
   ];
 
+  const logoutMutation = useLogout({
+    onSuccess: () => {
+      router.push('/login');
+    },
+  });
+
   const handleLogout = () => {
-    logout();
-    router.push('/login');
+    logoutMutation.mutate();
   };
 
   return (
