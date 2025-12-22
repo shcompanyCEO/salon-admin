@@ -43,7 +43,7 @@ serve(async (req) => {
     }
 
     // 2. Get the request body
-    const { email, role, permissions, name } = await req.json();
+    const { email, role, permissions, name, redirectTo } = await req.json();
 
     if (!email || !role || !name) {
       throw new Error('Email, Role, and Name are required');
@@ -55,15 +55,31 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // 4. Invite User
+    // 4. Get Inviter's Shop ID from public.users
+    // We use admin client to ensure we can read the user's data regardless of RLS, although users should be able to read their own shop_id.
+    const { data: inviterData, error: inviterDataError } = await supabaseAdmin
+      .from('users')
+      .select('shop_id')
+      .eq('id', user.id)
+      .single();
+
+    if (inviterDataError || !inviterData?.shop_id) {
+      console.error('Inviter Data Error:', inviterDataError);
+      throw new Error(
+        'Could not find shop information for the inviter. Please contact support.'
+      );
+    }
+
+    // 5. Invite User
     // We pass all necessary info in metadata so the handle_new_user trigger can populate public.users and admin_profiles
     const { data: invitedUser, error: inviteError } =
       await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+        redirectTo: redirectTo,
         data: {
           user_type: 'ADMIN_USER',
           role: role,
           name: name,
-          shop_id: user.user_metadata.shop_id, // Pass inviter's shop_id
+          shop_id: inviterData.shop_id, // Pass inviter's shop_id
           permissions: permissions || {},
           is_approved: true, // Auto-approve invited staff
           invited_by: user.id,

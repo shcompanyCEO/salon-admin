@@ -31,6 +31,7 @@ export async function inviteStaff({
           name,
           role,
           permissions: {}, // Default permissions
+          redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/update-password`,
         }),
       }
     );

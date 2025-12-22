@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { supabase } from '@/lib/supabase';
@@ -47,11 +49,16 @@ export default function InviteStaffModal({
 
       onSuccess();
       onClose();
-      // Reset form
-      setEmail('');
-      setName('');
       setRole('STAFF');
     } catch (err: any) {
+      if (
+        err.message?.includes('User from sub claim') ||
+        err.message?.toLowerCase().includes('unauthorized')
+      ) {
+        await supabase.auth.signOut();
+        window.location.href = '/login';
+        return;
+      }
       setError(err.message);
     } finally {
       setLoading(false);
