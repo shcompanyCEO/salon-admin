@@ -75,7 +75,8 @@ export async function signInWithEmail(
       email: userData.email,
       name: userData.name,
       phone: userData.phone || '',
-      role: userData.role as UserRole,
+      // Normalize role to uppercase and fallback to SALON_MANAGER if missing
+      role: (userData.role?.toUpperCase() as UserRole) || UserRole.SALON_MANAGER,
       salonId: userData.salon_id,
       profileImage: userData.profile_image,
       createdAt: new Date(userData.created_at),

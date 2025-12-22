@@ -3,7 +3,8 @@
 -- ============================================
 
 CREATE TABLE admin_profiles (
-  user_id UUID PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+  user_id UUID PRIMARY KEY,
+  user_type user_type NOT NULL DEFAULT 'ADMIN_USER',
 
   -- Position (customizable by shop)
   position_id UUID REFERENCES staff_positions(id) ON DELETE SET NULL,
@@ -46,9 +47,9 @@ CREATE TABLE admin_profiles (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-  CONSTRAINT admin_user_only CHECK (
-    EXISTS (SELECT 1 FROM users WHERE id = user_id AND user_type = 'ADMIN_USER')
-  )
+  -- Ensure this profile is only for ADMIN_USER
+  CONSTRAINT admin_user_type_check CHECK (user_type = 'ADMIN_USER'),
+  FOREIGN KEY (user_id, user_type) REFERENCES users(id, user_type) ON DELETE CASCADE
 );
 
 -- Indexes

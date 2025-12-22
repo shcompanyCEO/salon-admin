@@ -38,10 +38,10 @@ CREATE POLICY "Admins can create users in their shop"
   ON users FOR INSERT
   WITH CHECK (
     EXISTS (
-      SELECT 1 FROM users
-      WHERE id = auth.uid()
-      AND user_type = 'ADMIN_USER'
-      AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
-      AND (shop_id = NEW.shop_id OR role = 'SUPER_ADMIN')
+      SELECT 1 FROM users AS auth_user
+      WHERE auth_user.id = auth.uid()
+      AND auth_user.user_type = 'ADMIN_USER'
+      AND auth_user.role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
+      AND (auth_user.shop_id = shop_id OR auth_user.role = 'SUPER_ADMIN')
     )
   );

@@ -41,7 +41,8 @@ CREATE TABLE services (
   CONSTRAINT fixed_price_required CHECK (
     (pricing_type = 'FIXED' AND base_price IS NOT NULL) OR
     (pricing_type = 'POSITION_BASED')
-  )
+  ),
+  UNIQUE (id, pricing_type) -- Added for composite FK in service_position_prices
 );
 
 -- Indexes

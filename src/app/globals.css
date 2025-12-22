@@ -3,8 +3,38 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Toss Blue Scale */
+    --primary-50: #e8f3ff;
+    --primary-100: #c9e2ff;
+    --primary-200: #9ac5ff;
+    --primary-300: #6aa1ff;
+    --primary-400: #4b89ff;
+    --primary-500: #3182f6; /* Toss Brand Blue */
+    --primary-600: #1b64da;
+    --primary-700: #114eb6;
+    --primary-800: #0e4092;
+    --primary-900: #0b3577;
+
+    /* Cool Gray Scale */
+    --secondary-50: #f9fafb;
+    --secondary-100: #f2f4f6;
+    --secondary-200: #e5e8eb;
+    --secondary-300: #d1d6db;
+    --secondary-400: #b0b8c1;
+    --secondary-500: #8b95a1;
+    --secondary-600: #6b7684;
+    --secondary-700: #4e5968;
+    --secondary-800: #333d4b;
+    --secondary-900: #191f28;
+
+    --background: #ffffff;
+    --foreground: #191f28;
+  }
+
   body {
-    @apply bg-gray-50 text-gray-900;
+    @apply bg-white text-secondary-900;
+    font-feature-settings: "ss03", "cv02", "cv11";
   }
 }
 
@@ -25,13 +55,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-secondary-100;
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-secondary-400 rounded-full;
+  background-color: var(--secondary-300);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-secondary-500;
+  background-color: var(--secondary-400);
 }

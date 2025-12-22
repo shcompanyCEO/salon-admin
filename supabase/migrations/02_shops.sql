@@ -1,4 +1,13 @@
 -- ============================================
+-- Industries Table (Dynamic)
+-- ============================================
+CREATE TABLE industries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- ============================================
 -- Shops Table
 -- ============================================
 
@@ -7,7 +16,6 @@ CREATE TABLE shops (
 
   -- Basic info
   name TEXT NOT NULL,
-  business_type business_type NOT NULL,
   description TEXT,
 
   -- Contact
@@ -34,10 +42,9 @@ CREATE TABLE shops (
     "sunday": {"enabled": false, "open": null, "close": null}
   }'::jsonb,
 
-  -- Media
+  -- Media (Logo and Cover only, others in shop_images)
   logo_url TEXT,
   cover_image_url TEXT,
-  images TEXT[] DEFAULT '{}',
 
   -- Settings
   settings JSONB DEFAULT '{
@@ -49,6 +56,8 @@ CREATE TABLE shops (
   }'::jsonb,
 
   -- Status
+  approval_status TEXT DEFAULT 'pending', -- pending, approved, rejected
+  approved_at TIMESTAMP WITH TIME ZONE,
   is_active BOOLEAN NOT NULL DEFAULT true,
   deleted_at TIMESTAMP WITH TIME ZONE,
 
@@ -58,9 +67,36 @@ CREATE TABLE shops (
 );
 
 -- Indexes
-CREATE INDEX idx_shops_business_type ON shops(business_type) WHERE deleted_at IS NULL;
 CREATE INDEX idx_shops_active ON shops(is_active) WHERE deleted_at IS NULL;
 CREATE INDEX idx_shops_location ON shops(latitude, longitude) WHERE deleted_at IS NULL;
+CREATE INDEX idx_shops_approval ON shops(approval_status);
 
 -- Comments
 COMMENT ON TABLE shops IS 'Beauty shop/salon information';
+
+-- ============================================
+-- Shop Industries (Many-to-Many)
+-- ============================================
+CREATE TABLE shop_industries (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+    industry_id UUID REFERENCES industries(id) ON DELETE CASCADE,
+    UNIQUE (shop_id, industry_id)
+);
+
+CREATE INDEX idx_shop_industries_shop ON shop_industries(shop_id);
+CREATE INDEX idx_shop_industries_industry ON shop_industries(industry_id);
+
+-- ============================================
+-- Shop Images (Gallery)
+-- ============================================
+CREATE TABLE shop_images (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+    image_url TEXT NOT NULL,
+    caption TEXT,
+    display_order INTEGER DEFAULT 0,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+CREATE INDEX idx_shop_images_shop ON shop_images(shop_id);

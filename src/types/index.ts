@@ -1,6 +1,7 @@
 // 사용자 역할
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
   SALON_MANAGER = 'SALON_MANAGER',
   DESIGNER = 'DESIGNER',
   CUSTOMER = 'CUSTOMER',
@@ -238,7 +239,12 @@ export interface DesignerSales {
 export interface Notification {
   id: string;
   userId: string;
-  type: 'BOOKING_CONFIRMED' | 'BOOKING_CANCELLED' | 'BOOKING_REMINDER' | 'REVIEW_NEW' | 'CHAT_NEW';
+  type:
+    | 'BOOKING_CONFIRMED'
+    | 'BOOKING_CANCELLED'
+    | 'BOOKING_REMINDER'
+    | 'REVIEW_NEW'
+    | 'CHAT_NEW';
   title: string;
   message: string;
   data?: any;

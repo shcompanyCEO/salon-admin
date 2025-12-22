@@ -23,18 +23,7 @@ CREATE TYPE auth_provider AS ENUM (
   'KAKAO'           -- Kakao login
 );
 
--- Business types
-CREATE TYPE business_type AS ENUM (
-  'HAIR_SALON',
-  'NAIL_SALON',
-  'SKIN_CARE',
-  'MAKEUP',
-  'SPA',
-  'MASSAGE',
-  'EYELASH',
-  'WAXING',
-  'OTHER'
-);
+
 
 -- Booking status
 CREATE TYPE booking_status AS ENUM (

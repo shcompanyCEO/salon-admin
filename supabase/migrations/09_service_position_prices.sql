@@ -5,8 +5,11 @@
 
 CREATE TABLE service_position_prices (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  service_id UUID NOT NULL REFERENCES services(id) ON DELETE CASCADE,
+  service_id UUID NOT NULL,
   position_id UUID NOT NULL REFERENCES staff_positions(id) ON DELETE CASCADE,
+  
+  -- Required for composite FK
+  pricing_type TEXT NOT NULL DEFAULT 'POSITION_BASED',
 
   -- Price for this position level
   price DECIMAL(10, 2) NOT NULL,
@@ -17,12 +20,8 @@ CREATE TABLE service_position_prices (
   UNIQUE(service_id, position_id),
 
   -- Ensure this is only used for POSITION_BASED services
-  CONSTRAINT position_based_only CHECK (
-    EXISTS (
-      SELECT 1 FROM services
-      WHERE id = service_id AND pricing_type = 'POSITION_BASED'
-    )
-  )
+  CONSTRAINT position_prices_type_check CHECK (pricing_type = 'POSITION_BASED'),
+  FOREIGN KEY (service_id, pricing_type) REFERENCES services(id, pricing_type) ON DELETE CASCADE
 );
 
 -- Indexes

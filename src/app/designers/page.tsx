@@ -6,15 +6,17 @@ import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { Modal } from '@/components/ui/Modal';
+import InviteStaffModal from '@/components/designers/InviteStaffModal'; // Import the new modal
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { useTranslation } from '@/locales/useTranslation';
 import { Designer, ServiceType } from '@/types';
-import { Plus, Star, Edit, Trash2 } from 'lucide-react';
+import { Plus, Star, Edit, Trash2, Mail } from 'lucide-react'; // Added Mail icon
 
 export default function DesignersPage() {
   const { t } = useTranslation();
   const [showNewDesignerModal, setShowNewDesignerModal] = useState(false);
+  const [showInviteModal, setShowInviteModal] = useState(false); // New state for invite modal
 
   // Mock data
   const [designers] = useState<Designer[]>([
@@ -92,13 +94,19 @@ export default function DesignersPage() {
               디자이너 정보를 관리하고 권한을 설정하세요
             </p>
           </div>
-          <Button
-            variant="primary"
-            onClick={() => setShowNewDesignerModal(true)}
-          >
-            <Plus size={20} className="mr-2" />
-            {t('designer.addDesigner')}
-          </Button>
+          <div className="flex space-x-3">
+            <Button variant="outline" onClick={() => setShowInviteModal(true)}>
+              <Mail size={20} className="mr-2" />
+              Invite Staff
+            </Button>
+            <Button
+              variant="primary"
+              onClick={() => setShowNewDesignerModal(true)}
+            >
+              <Plus size={20} className="mr-2" />
+              {t('designer.addDesigner')}
+            </Button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -106,7 +114,7 @@ export default function DesignersPage() {
           <Card>
             <div className="text-center">
               <p className="text-2xl font-bold text-secondary-900">
-                {designers.filter(d => d.isActive).length}
+                {designers.filter((d) => d.isActive).length}
               </p>
               <p className="text-sm text-secondary-600 mt-1">활성 디자이너</p>
             </div>
@@ -114,7 +122,10 @@ export default function DesignersPage() {
           <Card>
             <div className="text-center">
               <p className="text-2xl font-bold text-secondary-900">
-                {(designers.reduce((sum, d) => sum + d.rating, 0) / designers.length).toFixed(1)}
+                {(
+                  designers.reduce((sum, d) => sum + d.rating, 0) /
+                  designers.length
+                ).toFixed(1)}
               </p>
               <p className="text-sm text-secondary-600 mt-1">평균 평점</p>
             </div>
@@ -150,7 +161,10 @@ export default function DesignersPage() {
                         경력 {designer.experience}년
                       </p>
                       <div className="flex items-center mt-1">
-                        <Star size={16} className="text-yellow-400 fill-yellow-400 mr-1" />
+                        <Star
+                          size={16}
+                          className="text-yellow-400 fill-yellow-400 mr-1"
+                        />
                         <span className="text-sm font-medium text-secondary-900">
                           {designer.rating}
                         </span>
@@ -161,7 +175,9 @@ export default function DesignersPage() {
                     </div>
                   </div>
                   <Badge variant={designer.isActive ? 'success' : 'default'}>
-                    {designer.isActive ? t('designer.active') : t('designer.inactive')}
+                    {designer.isActive
+                      ? t('designer.active')
+                      : t('designer.inactive')}
                   </Badge>
                 </div>
 
@@ -186,11 +202,7 @@ export default function DesignersPage() {
 
                 {/* Actions */}
                 <div className="flex space-x-2 pt-2 border-t border-secondary-200">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex-1"
-                  >
+                  <Button variant="outline" size="sm" className="flex-1">
                     <Edit size={16} className="mr-1" />
                     {t('common.edit')}
                   </Button>
@@ -208,7 +220,7 @@ export default function DesignersPage() {
         </div>
       </div>
 
-      {/* New Designer Modal */}
+      {/* New Designer Modal (Manual Entry) */}
       <Modal
         isOpen={showNewDesignerModal}
         onClose={() => setShowNewDesignerModal(false)}
@@ -222,10 +234,7 @@ export default function DesignersPage() {
             placeholder="디자이너 이름을 입력하세요"
           />
 
-          <Input
-            label="설명"
-            placeholder="디자이너 소개를 입력하세요"
-          />
+          <Input label="설명" placeholder="디자이너 소개를 입력하세요" />
 
           <Input
             type="number"
@@ -260,17 +269,19 @@ export default function DesignersPage() {
               {t('designer.permissions')}
             </label>
             <div className="space-y-2">
-              {['예약 관리', '고객 관리', '리뷰 관리', '매출 확인'].map((permission) => (
-                <label key={permission} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
-                  />
-                  <span className="ml-2 text-sm text-secondary-700">
-                    {permission}
-                  </span>
-                </label>
-              ))}
+              {['예약 관리', '고객 관리', '리뷰 관리', '매출 확인'].map(
+                (permission) => (
+                  <label key={permission} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
+                    />
+                    <span className="ml-2 text-sm text-secondary-700">
+                      {permission}
+                    </span>
+                  </label>
+                )
+              )}
             </div>
           </div>
 
@@ -287,6 +298,16 @@ export default function DesignersPage() {
           </div>
         </form>
       </Modal>
+
+      {/* Invite Staff Modal */}
+      <InviteStaffModal
+        isOpen={showInviteModal}
+        onClose={() => setShowInviteModal(false)}
+        onSuccess={() => {
+          // In a real app, you might refetch the designers list here
+          alert('Invitation sent successfully!');
+        }}
+      />
     </Layout>
   );
 }

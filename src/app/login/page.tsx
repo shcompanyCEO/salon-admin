@@ -147,13 +147,6 @@ export default function LoginPage() {
             </p>
           </div>
         </div>
-
-        {/* Demo credentials */}
-        <div className="mt-6 p-4 bg-white/50 rounded-lg">
-          <p className="text-xs text-secondary-600 text-center">
-            <strong>데모 계정:</strong> admin@salon.com / password123
-          </p>
-        </div>
       </div>
     </div>
   );

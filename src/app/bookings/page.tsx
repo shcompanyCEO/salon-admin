@@ -65,11 +65,26 @@ export default function BookingsPage() {
 
   const getStatusBadge = (status: BookingStatus) => {
     const statusConfig = {
-      [BookingStatus.PENDING]: { variant: 'warning' as const, label: t('booking.pending') },
-      [BookingStatus.CONFIRMED]: { variant: 'info' as const, label: t('booking.confirmed') },
-      [BookingStatus.COMPLETED]: { variant: 'success' as const, label: t('booking.completed') },
-      [BookingStatus.CANCELLED]: { variant: 'danger' as const, label: t('booking.cancelled') },
-      [BookingStatus.NO_SHOW]: { variant: 'default' as const, label: t('booking.noShow') },
+      [BookingStatus.PENDING]: {
+        variant: 'warning' as const,
+        label: t('booking.pending'),
+      },
+      [BookingStatus.CONFIRMED]: {
+        variant: 'info' as const,
+        label: t('booking.confirmed'),
+      },
+      [BookingStatus.COMPLETED]: {
+        variant: 'success' as const,
+        label: t('booking.completed'),
+      },
+      [BookingStatus.CANCELLED]: {
+        variant: 'danger' as const,
+        label: t('booking.cancelled'),
+      },
+      [BookingStatus.NO_SHOW]: {
+        variant: 'default' as const,
+        label: t('booking.noShow'),
+      },
     };
 
     const config = statusConfig[status];
@@ -87,7 +102,7 @@ export default function BookingsPage() {
     return colorMap[status];
   };
 
-  const calendarEvents = bookings.map(booking => ({
+  const calendarEvents = bookings.map((booking) => ({
     id: booking.id,
     date: booking.date,
     title: `${booking.customerName} - ${booking.serviceName}`,
@@ -206,9 +221,18 @@ export default function BookingsPage() {
               options={[
                 { value: '', label: '전체' },
                 { value: BookingStatus.PENDING, label: t('booking.pending') },
-                { value: BookingStatus.CONFIRMED, label: t('booking.confirmed') },
-                { value: BookingStatus.COMPLETED, label: t('booking.completed') },
-                { value: BookingStatus.CANCELLED, label: t('booking.cancelled') },
+                {
+                  value: BookingStatus.CONFIRMED,
+                  label: t('booking.confirmed'),
+                },
+                {
+                  value: BookingStatus.COMPLETED,
+                  label: t('booking.completed'),
+                },
+                {
+                  value: BookingStatus.CANCELLED,
+                  label: t('booking.cancelled'),
+                },
               ]}
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -237,7 +261,7 @@ export default function BookingsPage() {
             onDateSelect={setSelectedDate}
             events={calendarEvents}
             onEventClick={(event) => {
-              const booking = bookings.find(b => b.id === event.id);
+              const booking = bookings.find((b) => b.id === event.id);
               if (booking) {
                 console.log('View booking:', booking);
               }

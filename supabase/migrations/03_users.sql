@@ -46,7 +46,8 @@ CREATE TABLE users (
   CONSTRAINT super_admin_no_shop CHECK (
     (role = 'SUPER_ADMIN' AND shop_id IS NULL) OR
     (role != 'SUPER_ADMIN')
-  )
+  ),
+  UNIQUE (id, user_type) -- Added for composite FK reference
 );
 
 -- Indexes
