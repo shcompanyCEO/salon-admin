@@ -14,6 +14,7 @@ import {
   Building2,
   UserCog,
   Menu,
+  Briefcase,
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -33,67 +34,68 @@ export const Sidebar: React.FC = () => {
       name: t('nav.dashboard'),
       icon: LayoutDashboard,
       href: '/dashboard',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
     {
       name: t('nav.bookings'),
       icon: Calendar,
       href: '/bookings',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
     {
       name: t('nav.customers'),
       icon: Users,
       href: '/customers',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
-    {
-      name: t('nav.designers'),
-      icon: Scissors,
-      href: '/designers',
-      roles: [UserRole.SALON_MANAGER, UserRole.ADMIN],
-    },
+
     {
       name: t('nav.services'),
       icon: ShoppingBag,
       href: '/services',
-      roles: [UserRole.SALON_MANAGER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.ADMIN],
     },
     {
       name: t('nav.reviews'),
       icon: Star,
       href: '/reviews',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
     {
       name: t('nav.sales'),
       icon: TrendingUp,
       href: '/sales',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
     {
       name: t('nav.chat'),
       icon: MessageSquare,
       href: '/chat',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
     {
       name: t('nav.salons'),
       icon: Building2,
       href: '/salons',
-      roles: [UserRole.SALON_MANAGER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.ADMIN],
     },
     {
       name: t('nav.users'),
       icon: UserCog,
       href: '/users',
-      roles: [UserRole.SALON_MANAGER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.ADMIN],
+    },
+    {
+      name: t('nav.staff'),
+      icon: Briefcase,
+      href: '/staff',
+      roles: [UserRole.MANAGER, UserRole.ADMIN, UserRole.STAFF],
     },
     {
       name: t('nav.settings'),
       icon: Settings,
       href: '/settings',
-      roles: [UserRole.SALON_MANAGER, UserRole.DESIGNER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
     },
   ];
 

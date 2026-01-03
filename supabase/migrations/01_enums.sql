@@ -7,11 +7,10 @@ CREATE TYPE user_type AS ENUM ('ADMIN_USER', 'CUSTOMER');
 
 -- User roles (System-level permissions)
 CREATE TYPE user_role AS ENUM (
-  'SUPER_ADMIN',    -- Platform owner (manages all shops)
-  'ADMIN',          -- Shop owner (default on signup)
-  'MANAGER',        -- Shop manager
+  'SUPER_ADMIN',    -- Platform owner (manages all salons)
+  'ADMIN',          -- Salon owner (default on signup)
+  'MANAGER',        -- Salon manager
   'STAFF',          -- General staff
-  'DESIGNER',       -- Designer/stylist
   'CUSTOMER'        -- Customer
 );
 

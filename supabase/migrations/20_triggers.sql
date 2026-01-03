@@ -17,16 +17,16 @@ DROP TRIGGER IF EXISTS update_users_updated_at ON users;
 CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-DROP TRIGGER IF EXISTS update_shops_updated_at ON shops;
-CREATE TRIGGER update_shops_updated_at BEFORE UPDATE ON shops
+DROP TRIGGER IF EXISTS update_salons_updated_at ON salons;
+CREATE TRIGGER update_salons_updated_at BEFORE UPDATE ON salons
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 DROP TRIGGER IF EXISTS update_staff_positions_updated_at ON staff_positions;
 CREATE TRIGGER update_staff_positions_updated_at BEFORE UPDATE ON staff_positions
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
-DROP TRIGGER IF EXISTS update_admin_profiles_updated_at ON admin_profiles;
-CREATE TRIGGER update_admin_profiles_updated_at BEFORE UPDATE ON admin_profiles
+DROP TRIGGER IF EXISTS update_staff_profiles_updated_at ON staff_profiles;
+CREATE TRIGGER update_staff_profiles_updated_at BEFORE UPDATE ON staff_profiles
   FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 DROP TRIGGER IF EXISTS update_customer_profiles_updated_at ON customer_profiles;
@@ -57,15 +57,15 @@ CREATE TRIGGER update_reviews_updated_at BEFORE UPDATE ON reviews
 CREATE OR REPLACE FUNCTION handle_new_user()
 RETURNS TRIGGER AS $$
 DECLARE
-  v_shop_id UUID;
+  v_salon_id UUID;
   v_permissions JSONB;
 BEGIN
-  -- Extract shop_id from metadata if present (for invites)
-  IF (NEW.raw_user_meta_data->>'shop_id' IS NOT NULL) THEN
-    v_shop_id := (NEW.raw_user_meta_data->>'shop_id')::UUID;
+  -- Extract salon_id from metadata if present (for invites)
+  IF (NEW.raw_user_meta_data->>'salon_id' IS NOT NULL) THEN
+    v_salon_id := (NEW.raw_user_meta_data->>'salon_id')::UUID;
   END IF;
 
-  INSERT INTO users (id, user_type, role, email, name, phone, auth_provider, provider_user_id, is_approved, shop_id, approved_by, approved_at)
+  INSERT INTO users (id, user_type, role, email, name, phone, auth_provider, provider_user_id, is_approved, salon_id, approved_by, approved_at)
   VALUES (
     NEW.id,
     COALESCE(NEW.raw_user_meta_data->>'user_type', 'CUSTOMER')::user_type,
@@ -88,7 +88,7 @@ BEGIN
         ELSE false
       END
     ),
-    v_shop_id,
+    v_salon_id,
     -- If approved in metadata, set approved_by/at (logic simplified, ideally passed in metadata too or default to null for system/inviter)
     CASE WHEN (NEW.raw_user_meta_data->>'is_approved')::boolean = true THEN NEW.id ELSE NULL END, -- Self reference or NULL as placeholder
     CASE WHEN (NEW.raw_user_meta_data->>'is_approved')::boolean = true THEN NOW() ELSE NULL END
@@ -107,7 +107,7 @@ BEGIN
     -- Extract permissions from metadata if present
     v_permissions := COALESCE((NEW.raw_user_meta_data->>'permissions')::jsonb, NULL);
     
-    INSERT INTO admin_profiles (user_id, permissions)
+    INSERT INTO staff_profiles (user_id, permissions)
     VALUES (
       NEW.id,
       COALESCE(v_permissions, '{

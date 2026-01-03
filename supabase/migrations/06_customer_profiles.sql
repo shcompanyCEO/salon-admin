@@ -13,7 +13,7 @@ CREATE TABLE customer_profiles (
   line_status_message TEXT,
 
   -- Customer preferences
-  preferred_shop_id UUID REFERENCES shops(id) ON DELETE SET NULL,
+  preferred_salon_id UUID REFERENCES salons(id) ON DELETE SET NULL,
   preferred_designer_id UUID REFERENCES users(id) ON DELETE SET NULL,
   preferences JSONB DEFAULT '{}'::jsonb, -- Styling preferences, allergies, etc.
 
@@ -38,7 +38,7 @@ CREATE TABLE customer_profiles (
 
 -- Indexes
 CREATE INDEX idx_customer_profiles_line ON customer_profiles(line_user_id);
-CREATE INDEX idx_customer_profiles_shop ON customer_profiles(preferred_shop_id);
+CREATE INDEX idx_customer_profiles_salon ON customer_profiles(preferred_salon_id);
 
 -- Comments
 COMMENT ON TABLE customer_profiles IS 'Additional profile data for customers with LINE integration';

@@ -25,11 +25,11 @@ CREATE POLICY "Customers can update their own reviews"
   ON reviews FOR UPDATE
   USING (auth.uid() = customer_id);
 
--- Shop staff can respond to reviews
-CREATE POLICY "Shop staff can respond to reviews"
+-- Salon staff can respond to reviews
+CREATE POLICY "Salon staff can respond to reviews"
   ON reviews FOR UPDATE
   USING (
-    shop_id IN (
-      SELECT shop_id FROM users WHERE id = auth.uid()
+    salon_id IN (
+      SELECT salon_id FROM users WHERE id = auth.uid()
     )
   );

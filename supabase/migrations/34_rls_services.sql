@@ -9,11 +9,11 @@ CREATE POLICY "Anyone can view active categories"
   ON service_categories FOR SELECT
   USING (is_active = true AND deleted_at IS NULL);
 
-CREATE POLICY "Shop managers can manage their categories"
+CREATE POLICY "Salon managers can manage their categories"
   ON service_categories FOR ALL
   USING (
-    shop_id IN (
-      SELECT shop_id FROM users
+    salon_id IN (
+      SELECT salon_id FROM users
       WHERE id = auth.uid() AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
     )
   );
@@ -25,11 +25,11 @@ CREATE POLICY "Anyone can view active services"
   ON services FOR SELECT
   USING (is_active = true AND deleted_at IS NULL);
 
-CREATE POLICY "Shop managers can manage their services"
+CREATE POLICY "Salon managers can manage their services"
   ON services FOR ALL
   USING (
-    shop_id IN (
-      SELECT shop_id FROM users
+    salon_id IN (
+      SELECT salon_id FROM users
       WHERE id = auth.uid() AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
     )
   );
@@ -41,13 +41,13 @@ CREATE POLICY "Anyone can view service prices"
   ON service_position_prices FOR SELECT
   USING (true);
 
-CREATE POLICY "Shop managers can manage service prices"
+CREATE POLICY "Salon managers can manage service prices"
   ON service_position_prices FOR ALL
   USING (
     service_id IN (
       SELECT id FROM services
-      WHERE shop_id IN (
-        SELECT shop_id FROM users
+      WHERE salon_id IN (
+        SELECT salon_id FROM users
         WHERE id = auth.uid() AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
       )
     )

@@ -15,7 +15,7 @@ export type Database = {
           email: string;
           name: string;
           phone: string;
-          role: 'SUPER_ADMIN' | 'SALON_MANAGER' | 'DESIGNER' | 'CUSTOMER';
+          role: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'STAFF' | 'CUSTOMER';
           salon_id: string | null;
           profile_image: string | null;
           is_active: boolean;
@@ -27,7 +27,7 @@ export type Database = {
           email: string;
           name: string;
           phone?: string;
-          role?: 'SUPER_ADMIN' | 'SALON_MANAGER' | 'DESIGNER' | 'CUSTOMER';
+          role?: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'STAFF' | 'CUSTOMER';
           salon_id?: string | null;
           profile_image?: string | null;
           is_active?: boolean;
@@ -38,7 +38,7 @@ export type Database = {
           email?: string;
           name?: string;
           phone?: string;
-          role?: 'SUPER_ADMIN' | 'SALON_MANAGER' | 'DESIGNER' | 'CUSTOMER';
+          role?: 'SUPER_ADMIN' | 'ADMIN' | 'MANAGER' | 'STAFF' | 'CUSTOMER';
           salon_id?: string | null;
           profile_image?: string | null;
           is_active?: boolean;

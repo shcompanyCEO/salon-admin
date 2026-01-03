@@ -5,6 +5,7 @@ import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
 import { useTranslation } from '@/locales/useTranslation';
 import { useAuthStore } from '@/store/authStore';
+import { useUser } from '@/lib/api/queries';
 import {
   Calendar,
   Users,
@@ -28,7 +29,8 @@ interface Stats {
 
 export default function DashboardPage() {
   const { t } = useTranslation();
-  const { user } = useAuthStore();
+  const { data: user, isLoading } = useUser();
+  // const { user } = useAuthStore(); // Replaced by useUser
   const [stats, setStats] = useState<Stats>({
     todayBookings: 12,
     todayRevenue: 45000,
@@ -38,6 +40,7 @@ export default function DashboardPage() {
     completedBookings: 234,
     cancelledBookings: 12,
   });
+  console.log('sean 1111111', user);
 
   const statCards = [
     {
@@ -99,9 +102,7 @@ export default function DashboardPage() {
           <h1 className="text-3xl font-bold text-secondary-900">
             {t('nav.dashboard')}
           </h1>
-          <p className="text-secondary-600 mt-1">
-            환영합니다, {user?.name}님!
-          </p>
+          <p className="text-secondary-600 mt-1">환영합니다, {user?.name}님!</p>
         </div>
 
         {/* Stats Grid */}
@@ -163,7 +164,7 @@ export default function DashboardPage() {
                       홍길동 고객
                     </p>
                     <p className="text-sm text-secondary-600">
-                      커트 · 김철수 디자이너
+                      커트 · 김철수 직원
                     </p>
                   </div>
                   <div className="text-right">
@@ -177,8 +178,8 @@ export default function DashboardPage() {
             </div>
           </Card>
 
-          {/* Top Designers */}
-          <Card title="이번 달 TOP 디자이너" className="h-full">
+          {/* Top Staff */}
+          <Card title="이번 달 TOP 직원" className="h-full">
             <div className="space-y-4">
               {[
                 { name: '김철수', bookings: 45, revenue: 3500000 },

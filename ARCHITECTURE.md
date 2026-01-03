@@ -70,7 +70,7 @@ salon-admin/
 │   │   │   └── [id]/
 │   │   │       └── page.tsx
 │   │   │
-│   │   ├── designers/               # 디자이너 관리
+│   │   ├── staff//               # 직원 관리
 │   │   │   ├── page.tsx
 │   │   │   └── [id]/
 │   │   │       └── page.tsx
@@ -117,7 +117,7 @@ salon-admin/
 │   │   └── features/                # 기능별 컴포넌트
 │   │       ├── bookings/
 │   │       ├── customers/
-│   │       └── designers/
+│   │       └── staff/
 │   │
 │   ├── store/                       # Zustand 상태 관리
 │   │   ├── authStore.ts            # 인증 상태
@@ -274,11 +274,11 @@ Zustand Stores
 │
 ├── salonStore
 │   ├── currentSalon: Salon | null
-│   ├── designers: Designer[]
+│   ├── staff: Staff[]
 │   ├── services: Service[]
 │   ├── setCurrentSalon(salon)
-│   ├── addDesigner(designer)
-│   ├── updateDesigner(id, data)
+│   ├── addStaff(staff)
+│   ├── updateStaff(id, data)
 │   └── addService(service)
 │
 ├── bookingStore
@@ -336,10 +336,10 @@ App
 │       │   ├── Table
 │       │   └── New Customer Modal
 │       │
-│       └── Designers Page
+│       └── Employee Page
 │           ├── Stats
-│           ├── Designer Cards
-│           └── New Designer Modal
+│           ├── Employee Cards
+│           └── New Employee Modal
 │
 └── Common UI Components
     ├── Button
@@ -369,12 +369,12 @@ Salons
 ├── PUT    /salons/:id
 └── DELETE /salons/:id
 
-Designers
-├── GET    /salons/:salonId/designers
-├── GET    /designers/:id
-├── POST   /salons/:salonId/designers
-├── PUT    /designers/:id
-└── DELETE /designers/:id
+Employees
+├── GET    /salons/:salonId/employees
+├── GET    /employees/:id
+├── POST   /salons/:salonId/employees
+├── PUT    /employees/:id
+└── DELETE /employees/:id
 
 Services
 ├── GET    /salons/:salonId/services
@@ -405,7 +405,7 @@ Reviews
 
 Sales
 ├── GET    /salons/:salonId/sales
-└── GET    /designers/:designerId/sales
+└── GET    /employees/:employeeId/sales
 
 Chat
 ├── GET    /chat/rooms
@@ -430,16 +430,16 @@ SUPER_ADMIN
 ├── View all statistics
 └── System monitoring
 
-SALON_MANAGER
+MANAGER (Salon Owner/Manager)
 ├── Manage own salon
-├── Manage designers
+├── Manage staff & schedule
 ├── Manage services
 ├── View all bookings
 ├── Manage customers
 ├── View sales reports
 └── Manage users
 
-DESIGNER
+STAFF (Designer/Intern)
 ├── View own schedule
 ├── Manage own bookings
 ├── View customer info

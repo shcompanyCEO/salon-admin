@@ -20,10 +20,11 @@ export async function signInWithEmail(
 ): Promise<AuthResponse> {
   try {
     // Supabase 인증
-    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data: authData, error: authError } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
     if (authError) {
       return {
@@ -54,12 +55,18 @@ export async function signInWithEmail(
       const user: User = {
         id: authData.user.id,
         email: authData.user.email!,
-        name: authData.user.user_metadata?.name || authData.user.email!.split('@')[0],
+        name:
+          authData.user.user_metadata?.name ||
+          authData.user.email!.split('@')[0],
         phone: authData.user.user_metadata?.phone || '',
-        role: (authData.user.user_metadata?.role as UserRole) || UserRole.SALON_MANAGER,
+        role:
+          (authData.user.user_metadata?.role as UserRole) || UserRole.MANAGER,
+        salonId: authData.user.user_metadata?.salon_id,
         profileImage: authData.user.user_metadata?.avatar_url,
         createdAt: new Date(authData.user.created_at),
-        updatedAt: new Date(authData.user.updated_at || authData.user.created_at),
+        updatedAt: new Date(
+          authData.user.updated_at || authData.user.created_at
+        ),
         isActive: true,
       };
 
@@ -69,6 +76,30 @@ export async function signInWithEmail(
       };
     }
 
+    // salon_id 확인 및 검증
+    let salonId = userData.salon_id;
+
+    if (salonId) {
+      const { data: salonData, error: salonError } = await supabase
+        .from('salons')
+        .select('id')
+        .eq('id', salonId)
+        .single();
+
+      if (salonError || !salonData) {
+        console.warn('Salon not found for user:', userData.id);
+        salonId = undefined;
+      } else {
+        const role = userData.role?.toUpperCase();
+        if (role !== 'ADMIN' && role !== 'MANAGER' && role !== 'STAFF') {
+          console.warn(
+            'User has salon_id but invalid role for salon access:',
+            role
+          );
+        }
+      }
+    }
+
     // users 테이블 데이터를 User 타입으로 변환
     const user: User = {
       id: userData.id,
@@ -76,8 +107,8 @@ export async function signInWithEmail(
       name: userData.name,
       phone: userData.phone || '',
       // Normalize role to uppercase and fallback to SALON_MANAGER if missing
-      role: (userData.role?.toUpperCase() as UserRole) || UserRole.SALON_MANAGER,
-      salonId: userData.salon_id,
+      role: (userData.role?.toUpperCase() as UserRole) || UserRole.MANAGER,
+      salonId: salonId,
       profileImage: userData.profile_image,
       createdAt: new Date(userData.created_at),
       updatedAt: new Date(userData.updated_at),
@@ -214,7 +245,9 @@ export async function getSession() {
 /**
  * 비밀번호 재설정 이메일 보내기
  */
-export async function sendPasswordResetEmail(email: string): Promise<{ error?: string }> {
+export async function sendPasswordResetEmail(
+  email: string
+): Promise<{ error?: string }> {
   try {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/reset-password`,
@@ -234,7 +267,9 @@ export async function sendPasswordResetEmail(email: string): Promise<{ error?: s
 /**
  * 비밀번호 업데이트
  */
-export async function updatePassword(newPassword: string): Promise<{ error?: string }> {
+export async function updatePassword(
+  newPassword: string
+): Promise<{ error?: string }> {
   try {
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
@@ -248,5 +283,95 @@ export async function updatePassword(newPassword: string): Promise<{ error?: str
   } catch (error) {
     console.error('Update password error:', error);
     return { error: '비밀번호 업데이트 중 오류가 발생했습니다' };
+  }
+}
+
+/**
+ * 현재 로그인한 사용자 정보 가져오기 (DB 조회 포함)
+ */
+export async function getCurrentUser(): Promise<User | null> {
+  try {
+    const { data: sessionData, error: sessionError } =
+      await supabase.auth.getSession();
+
+    if (sessionError || !sessionData.session) {
+      return null;
+    }
+
+    const { data: userData, error: userError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', sessionData.session.user.id)
+      .single();
+
+    if (userError || !userData) {
+      // DB에 정보가 없으면 auth 정보로 fallback (임시)
+      const user: User = {
+        id: sessionData.session.user.id,
+        email: sessionData.session.user.email!,
+        name:
+          sessionData.session.user.user_metadata?.name ||
+          sessionData.session.user.email!.split('@')[0],
+        phone: sessionData.session.user.user_metadata?.phone || '',
+        role:
+          (sessionData.session.user.user_metadata?.role as UserRole) ||
+          UserRole.MANAGER,
+        salonId: sessionData.session.user.user_metadata?.salon_id,
+        profileImage: sessionData.session.user.user_metadata?.avatar_url,
+        createdAt: new Date(sessionData.session.user.created_at),
+        updatedAt: new Date(
+          sessionData.session.user.updated_at ||
+            sessionData.session.user.created_at
+        ),
+        isActive: true,
+      };
+      return user;
+    }
+
+    // salon_id 확인 및 검증
+    let salonId = userData.salon_id;
+
+    if (salonId) {
+      const { data: salonData, error: salonError } = await supabase
+        .from('salons')
+        .select('id')
+        .eq('id', salonId)
+        .single();
+
+      if (salonError || !salonData) {
+        console.warn('Salon not found for user:', userData.id);
+        salonId = undefined;
+      } else {
+        // 롤 체크
+        const role = userData.role?.toUpperCase();
+        if (role !== 'ADMIN' && role !== 'MANAGER' && role !== 'STAFF') {
+          console.warn(
+            'User has salon_id but invalid role for salon access:',
+            role
+          );
+          // 로직에 따라 salonId를 제거하거나 에러를 반환할 수 있음.
+          // 여기서는 경고만 하고 진행
+        }
+      }
+    }
+
+    // DB 정보 반환
+    const user: User = {
+      id: userData.id,
+      email: userData.email,
+      name: userData.name,
+      phone: userData.phone || '',
+      role: (userData.role?.toUpperCase() as UserRole) || UserRole.MANAGER,
+      salonId: salonId,
+      profileImage: userData.profile_image,
+      createdAt: new Date(userData.created_at),
+      updatedAt: new Date(userData.updated_at),
+      isActive: userData.is_active ?? true,
+    };
+
+    return user;
+  } catch (error) {
+    console.error('Get current user error:', error);
+    return null;
   }
 }

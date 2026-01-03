@@ -4,7 +4,7 @@
 
 CREATE TABLE service_categories (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
 
   -- Category info
   name TEXT NOT NULL,           -- "CUT", "PERM", "COLOR", "CLINIC"
@@ -23,12 +23,12 @@ CREATE TABLE service_categories (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-  UNIQUE(shop_id, name)
+  UNIQUE(salon_id, name)
 );
 
 -- Indexes
-CREATE INDEX idx_service_categories_shop ON service_categories(shop_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_service_categories_active ON service_categories(is_active, shop_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_service_categories_salon ON service_categories(salon_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_service_categories_active ON service_categories(is_active, salon_id) WHERE deleted_at IS NULL;
 
 -- Comments
 COMMENT ON TABLE service_categories IS 'Service categories for organizing services (CUT, PERM, COLOR, etc.)';

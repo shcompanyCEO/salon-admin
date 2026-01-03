@@ -7,7 +7,7 @@ CREATE TABLE reviews (
 
   -- Relationships
   booking_id UUID NOT NULL REFERENCES bookings(id) ON DELETE CASCADE UNIQUE,
-  shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
   customer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   designer_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 
@@ -20,7 +20,7 @@ CREATE TABLE reviews (
   -- Media
   images TEXT[] DEFAULT '{}',
 
-  -- Response from shop
+  -- Response from salon
   response TEXT,
   response_by UUID REFERENCES users(id) ON DELETE SET NULL,
   responded_at TIMESTAMP WITH TIME ZONE,
@@ -34,7 +34,7 @@ CREATE TABLE reviews (
 );
 
 -- Indexes
-CREATE INDEX idx_reviews_shop ON reviews(shop_id) WHERE is_visible = true;
+CREATE INDEX idx_reviews_salon ON reviews(salon_id) WHERE is_visible = true;
 CREATE INDEX idx_reviews_designer ON reviews(designer_id) WHERE is_visible = true;
 CREATE INDEX idx_reviews_customer ON reviews(customer_id);
 

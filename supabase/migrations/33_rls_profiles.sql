@@ -2,19 +2,19 @@
 -- Row Level Security - Admin & Customer Profiles
 -- ============================================
 
--- Admin Profiles
-ALTER TABLE admin_profiles ENABLE ROW LEVEL SECURITY;
+-- Staff Profiles
+ALTER TABLE staff_profiles ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Admin users can view their own profile"
-  ON admin_profiles FOR SELECT
+CREATE POLICY "Staff users can view their own profile"
+  ON staff_profiles FOR SELECT
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Admin users in same shop can view each other"
-  ON admin_profiles FOR SELECT
+CREATE POLICY "Staff users in same salon can view each other"
+  ON staff_profiles FOR SELECT
   USING (
     user_id IN (
       SELECT id FROM users
-      WHERE shop_id = (SELECT shop_id FROM users WHERE id = auth.uid())
+      WHERE salon_id = (SELECT salon_id FROM users WHERE id = auth.uid())
     )
   );
 
@@ -29,7 +29,7 @@ CREATE POLICY "Customers can update their own profile"
   ON customer_profiles FOR UPDATE
   USING (auth.uid() = user_id);
 
-CREATE POLICY "Shop staff can view customer profiles"
+CREATE POLICY "Salon staff can view customer profiles"
   ON customer_profiles FOR SELECT
   USING (
     EXISTS (

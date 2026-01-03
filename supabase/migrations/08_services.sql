@@ -4,7 +4,7 @@
 
 CREATE TABLE services (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
   category_id UUID REFERENCES service_categories(id) ON DELETE SET NULL,
 
   -- Service info
@@ -46,12 +46,12 @@ CREATE TABLE services (
 );
 
 -- Indexes
-CREATE INDEX idx_services_shop ON services(shop_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_services_salon ON services(salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_services_category ON services(category_id) WHERE deleted_at IS NULL;
-CREATE INDEX idx_services_active ON services(is_active, shop_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_services_active ON services(is_active, salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_services_pricing_type ON services(pricing_type);
 
 -- Comments
-COMMENT ON TABLE services IS 'Services offered by shops';
+COMMENT ON TABLE services IS 'Services offered by salons';
 COMMENT ON COLUMN services.pricing_type IS 'FIXED: single price for all, POSITION_BASED: different prices per staff position';
 COMMENT ON COLUMN services.base_price IS 'Used only when pricing_type=FIXED';

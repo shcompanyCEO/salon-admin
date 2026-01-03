@@ -15,7 +15,7 @@ export const ko = {
     success: '성공',
     noData: '데이터가 없습니다',
   },
-  
+
   auth: {
     login: '로그인',
     logout: '로그아웃',
@@ -29,13 +29,13 @@ export const ko = {
     dashboard: '대시보드',
     bookings: '예약 관리',
     customers: '고객 관리',
-    designers: '디자이너 관리',
     services: '서비스 관리',
     reviews: '리뷰 관리',
     sales: '매출 관리',
     chat: '채팅',
     settings: '설정',
     users: '사용자 관리',
+    staff: '직원 관리',
     salons: '살롱 관리',
   },
 
@@ -49,7 +49,7 @@ export const ko = {
     completed: '완료됨',
     noShow: '노쇼',
     customer: '고객',
-    designer: '디자이너',
+    designer: '직원',
     service: '서비스',
     date: '날짜',
     time: '시간',
@@ -73,8 +73,8 @@ export const ko = {
     addCustomer: '고객 추가',
   },
 
-  designer: {
-    title: '디자이너 관리',
+  staff: {
+    title: '직원 관리',
     name: '이름',
     experience: '경력',
     specialties: '전문 분야',
@@ -84,7 +84,7 @@ export const ko = {
     active: '활성',
     inactive: '비활성',
     permissions: '권한',
-    addDesigner: '디자이너 추가',
+    addStaff: '직원 추가', // Renamed from addEmployee
   },
 
   service: {
@@ -121,7 +121,7 @@ export const ko = {
     monthly: '월별',
     custom: '사용자 지정',
     byService: '서비스별',
-    byDesigner: '디자이너별',
+    byStaff: '직원별',
     startDate: '시작일',
     endDate: '종료일',
   },

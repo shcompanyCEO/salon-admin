@@ -6,7 +6,7 @@ CREATE TABLE bookings (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
   -- Relationships
-  shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
   
   -- Customer Link (Composite FK)
   customer_id UUID NOT NULL,
@@ -69,7 +69,7 @@ CREATE TABLE bookings (
 );
 
 -- Indexes
-CREATE INDEX idx_bookings_shop ON bookings(shop_id);
+CREATE INDEX idx_bookings_salon ON bookings(salon_id);
 CREATE INDEX idx_bookings_customer ON bookings(customer_id);
 CREATE INDEX idx_bookings_designer ON bookings(designer_id);
 CREATE INDEX idx_bookings_date ON bookings(booking_date);

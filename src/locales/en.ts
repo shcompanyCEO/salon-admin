@@ -15,7 +15,7 @@ export const en = {
     success: 'Success',
     noData: 'No data available',
   },
-  
+
   auth: {
     login: 'Login',
     logout: 'Logout',
@@ -36,6 +36,7 @@ export const en = {
     chat: 'Chat',
     settings: 'Settings',
     users: 'Users',
+    employee: 'Employees',
     salons: 'Salons',
   },
 
@@ -73,8 +74,8 @@ export const en = {
     addCustomer: 'Add Customer',
   },
 
-  designer: {
-    title: 'Designer Management',
+  employee: {
+    title: 'Employee Management',
     name: 'Name',
     experience: 'Experience',
     specialties: 'Specialties',
@@ -84,7 +85,7 @@ export const en = {
     active: 'Active',
     inactive: 'Inactive',
     permissions: 'Permissions',
-    addDesigner: 'Add Designer',
+    addEmployee: 'Add Employee',
   },
 
   service: {

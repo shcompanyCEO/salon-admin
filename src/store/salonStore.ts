@@ -1,16 +1,16 @@
 import { create } from 'zustand';
-import { Salon, Designer, Service } from '@/types';
+import { Salon, Staff, Service } from '@/types';
 
 interface SalonState {
   currentSalon: Salon | null;
-  designers: Designer[];
+  staff: Staff[];
   services: Service[];
   setCurrentSalon: (salon: Salon | null) => void;
-  setDesigners: (designers: Designer[]) => void;
+  setStaff: (staff: Staff[]) => void;
   setServices: (services: Service[]) => void;
-  addDesigner: (designer: Designer) => void;
-  updateDesigner: (id: string, data: Partial<Designer>) => void;
-  removeDesigner: (id: string) => void;
+  addStaff: (staff: Staff) => void;
+  updateStaff: (id: string, data: Partial<Staff>) => void;
+  removeStaff: (id: string) => void;
   addService: (service: Service) => void;
   updateService: (id: string, data: Partial<Service>) => void;
   removeService: (id: string) => void;
@@ -18,30 +18,28 @@ interface SalonState {
 
 export const useSalonStore = create<SalonState>((set) => ({
   currentSalon: null,
-  designers: [],
+  staff: [],
   services: [],
 
   setCurrentSalon: (salon) => set({ currentSalon: salon }),
 
-  setDesigners: (designers) => set({ designers }),
+  setStaff: (staff) => set({ staff }),
 
   setServices: (services) => set({ services }),
 
-  addDesigner: (designer) =>
+  addStaff: (member) =>
     set((state) => ({
-      designers: [...state.designers, designer],
+      staff: [...state.staff, member],
     })),
 
-  updateDesigner: (id, data) =>
+  updateStaff: (id, data) =>
     set((state) => ({
-      designers: state.designers.map((d) =>
-        d.id === id ? { ...d, ...data } : d
-      ),
+      staff: state.staff.map((s) => (s.id === id ? { ...s, ...data } : s)),
     })),
 
-  removeDesigner: (id) =>
+  removeStaff: (id) =>
     set((state) => ({
-      designers: state.designers.filter((d) => d.id !== id),
+      staff: state.staff.filter((s) => s.id !== id),
     })),
 
   addService: (service) =>

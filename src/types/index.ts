@@ -1,32 +1,18 @@
-// 사용자 역할
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
-  SALON_MANAGER = 'SALON_MANAGER',
-  DESIGNER = 'DESIGNER',
+  MANAGER = 'MANAGER',
+  STAFF = 'STAFF',
   CUSTOMER = 'CUSTOMER',
 }
 
 // 언어 타입
 export type Locale = 'ko' | 'en' | 'th';
 
-// 살롱 카테고리
-export enum SalonCategory {
-  HAIR = 'HAIR',
-  NAIL = 'NAIL',
-  MAKEUP = 'MAKEUP',
-  MASSAGE = 'MASSAGE',
-  CLINIC = 'CLINIC',
-}
-
-// 서비스 타입
-export enum ServiceType {
-  CUT = 'CUT',
-  COLOR = 'COLOR',
-  PERM = 'PERM',
-  CLINIC = 'CLINIC',
-  TREATMENT = 'TREATMENT',
-}
+// 서비스 타입 (DB service_categories 참조)
+// export enum ServiceType { ... } // Removed
+// 살롱 카테고리 (DB industries 참조)
+// export enum SalonCategory { ... } // Removed
 
 // 예약 상태
 export enum BookingStatus {
@@ -55,7 +41,7 @@ export interface User {
 export interface Salon {
   id: string;
   name: string;
-  category: SalonCategory;
+  category: string; // industry_id or name from industries table
   description: string;
   address: string;
   latitude: number;
@@ -82,8 +68,8 @@ export interface BusinessHours {
   isOpen: boolean;
 }
 
-// 디자이너 인터페이스
-export interface Designer {
+// 직원(Staff) 인터페이스
+export interface Staff {
   id: string;
   userId: string;
   salonId: string;
@@ -92,17 +78,17 @@ export interface Designer {
   experience: number; // 경력 (년)
   profileImage?: string;
   portfolioImages: string[];
-  specialties: ServiceType[];
+  specialties: string[]; // service_category_ids
   rating: number;
   reviewCount: number;
   isActive: boolean;
-  permissions: DesignerPermission[];
+  permissions: StaffPermission[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-// 디자이너 권한
-export interface DesignerPermission {
+// 직원 권한
+export interface StaffPermission {
   module: string; // 'bookings', 'customers', 'reviews', 'sales'
   canRead: boolean;
   canWrite: boolean;
@@ -113,7 +99,7 @@ export interface DesignerPermission {
 export interface Service {
   id: string;
   salonId: string;
-  type: ServiceType;
+  categoryId: string; // references service_categories(id)
   name: string;
   description: string;
   price: number;
@@ -128,7 +114,7 @@ export interface Booking {
   customerName: string;
   customerPhone: string;
   salonId: string;
-  designerId: string;
+  staffId: string;
   serviceId: string;
   serviceName: string;
   date: Date;
@@ -163,7 +149,7 @@ export interface Review {
   customerId: string;
   customerName: string;
   salonId: string;
-  designerId: string;
+  staffId: string;
   bookingId: string;
   rating: number; // 1-5
   comment: string;
@@ -177,7 +163,7 @@ export interface Review {
 export interface ReviewResponse {
   responderId: string;
   responderName: string;
-  responderRole: 'SALON_MANAGER' | 'DESIGNER';
+  responderRole: 'MANAGER' | 'STAFF' | 'ADMIN';
   comment: string;
   createdAt: Date;
 }
@@ -217,19 +203,20 @@ export interface SalesStats {
   totalRevenue: number;
   totalBookings: number;
   byService: ServiceSales[];
-  byDesigner?: DesignerSales[];
+  byStaff?: StaffSales[];
 }
 
 export interface ServiceSales {
-  serviceType: ServiceType;
+  categoryId: string;
+  categoryName: string;
   serviceName: string;
   count: number;
   revenue: number;
 }
 
-export interface DesignerSales {
-  designerId: string;
-  designerName: string;
+export interface StaffSales {
+  staffId: string;
+  staffName: string;
   totalRevenue: number;
   totalBookings: number;
   byService: ServiceSales[];

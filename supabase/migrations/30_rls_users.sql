@@ -19,12 +19,12 @@ CREATE POLICY "Super admins can view all users"
     )
   );
 
--- Users can view same shop users
-CREATE POLICY "Users can view same shop users"
+-- Users can view same salon users
+CREATE POLICY "Users can view same salon users"
   ON users FOR SELECT
   USING (
-    shop_id IN (
-      SELECT shop_id FROM users WHERE id = auth.uid()
+    salon_id IN (
+      SELECT salon_id FROM users WHERE id = auth.uid()
     )
   );
 
@@ -33,8 +33,8 @@ CREATE POLICY "Users can update their own profile"
   ON users FOR UPDATE
   USING (auth.uid() = id);
 
--- Admins can create users in their shop
-CREATE POLICY "Admins can create users in their shop"
+-- Admins can create users in their salon
+CREATE POLICY "Admins can create users in their salon"
   ON users FOR INSERT
   WITH CHECK (
     EXISTS (
@@ -42,6 +42,6 @@ CREATE POLICY "Admins can create users in their shop"
       WHERE auth_user.id = auth.uid()
       AND auth_user.user_type = 'ADMIN_USER'
       AND auth_user.role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
-      AND (auth_user.shop_id = shop_id OR auth_user.role = 'SUPER_ADMIN')
+      AND (auth_user.salon_id = salon_id OR auth_user.role = 'SUPER_ADMIN')
     )
   );

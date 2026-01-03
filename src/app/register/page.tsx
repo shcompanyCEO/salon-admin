@@ -5,8 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Scissors } from 'lucide-react';
+import { Scissors, Check, X, Loader2 } from 'lucide-react';
 import { Select } from '@/components/ui/Select';
+import { supabase } from '@/lib/supabase';
+
+// Default industries matching the DB seed
+const INDUSTRIES = [
+  { label: '헤어샵', value: 'HAIR' },
+  { label: '네일샵', value: 'NAIL' },
+  { label: '에스테틱', value: 'ESTHETIC' },
+  { label: '마사지', value: 'MASSAGE' },
+  { label: '바버샵', value: 'BARBERSHOP' },
+];
 
 interface RegisterForm {
   email: string;
@@ -16,26 +26,135 @@ interface RegisterForm {
   shopName: string;
   countryCode: string;
   phone: string;
+  industryNames: string[]; // Multi-select
 }
+
+type CheckStatus = 'idle' | 'checking' | 'available' | 'taken' | 'error';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  // Duplicate Check States
+  const [emailStatus, setEmailStatus] = useState<CheckStatus>('idle');
+  const [shopNameStatus, setShopNameStatus] = useState<CheckStatus>('idle');
+  const [emailMessage, setEmailMessage] = useState('');
+  const [shopNameMessage, setShopNameMessage] = useState('');
+
   const {
     register,
     handleSubmit,
     watch,
+    setValue,
+    trigger,
     formState: { errors },
   } = useForm<RegisterForm>({
     defaultValues: {
       countryCode: '+82', // Default to Korea
+      industryNames: [],
     },
   });
 
+  // Watch for validation
+  const industryNames = watch('industryNames');
+  const email = watch('email');
+  const shopName = watch('shopName');
+
+  const toggleIndustry = (value: string) => {
+    const current = industryNames || [];
+    if (current.includes(value)) {
+      setValue(
+        'industryNames',
+        current.filter((i) => i !== value)
+      );
+    } else {
+      setValue('industryNames', [...current, value]);
+    }
+  };
+
+  const checkDuplicate = async (type: 'email' | 'shopName', value: string) => {
+    if (!value) return;
+
+    // Trigger basic validation first
+    const isValid = await trigger(type);
+    if (!isValid) return;
+
+    const setStatus = type === 'email' ? setEmailStatus : setShopNameStatus;
+    const setMessage = type === 'email' ? setEmailMessage : setShopNameMessage;
+
+    setStatus('checking');
+    setMessage('');
+
+    try {
+      const { data, error } = await supabase.functions.invoke(
+        'check-duplicate',
+        {
+          body: { type, value },
+        }
+      );
+
+      if (error) throw error;
+
+      if (data.available) {
+        setStatus('available');
+        setMessage(data.message || '사용 가능합니다.');
+      } else {
+        setStatus('taken');
+        setMessage(data.message || '이미 사용 중입니다.');
+      }
+    } catch (err: any) {
+      console.error(err);
+      setStatus('error');
+      setMessage('중복 확인 중 오류가 발생했습니다.');
+    }
+  };
+
+  const getStatusIcon = (status: CheckStatus) => {
+    switch (status) {
+      case 'checking':
+        return <Loader2 className="w-4 h-4 animate-spin text-gray-500" />;
+      case 'available':
+        return <Check className="w-4 h-4 text-green-500" />;
+      case 'taken':
+      case 'error':
+        return <X className="w-4 h-4 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusColor = (status: CheckStatus) => {
+    switch (status) {
+      case 'available':
+        return 'text-green-600';
+      case 'taken':
+      case 'error':
+        return 'text-red-600';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
   const onSubmit = async (data: RegisterForm) => {
     setError('');
+
+    // Pre-flight validation checks
+    if (emailStatus !== 'available') {
+      setError('이메일 중복 확인을 해주세요.');
+      return;
+    }
+    if (shopNameStatus !== 'available') {
+      setError('매장 이름 중복 확인을 해주세요.');
+      return;
+    }
+
+    // Manual validation for industries
+    if (!data.industryNames || data.industryNames.length === 0) {
+      setError('최소 하나의 업종을 선택해주세요.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -43,9 +162,7 @@ export default function RegisterPage() {
         throw new Error('비밀번호가 일치하지 않습니다');
       }
 
-      // Remove leading 0 from phone if present when using country code (optional, but good practice)
-      // e.g. 010-1234 -> +82101234
-      let cleanPhone = data.phone.replace(/-/g, ''); // Remove hyphens
+      let cleanPhone = data.phone.replace(/-/g, '');
       if (cleanPhone.startsWith('0')) {
         cleanPhone = cleanPhone.substring(1);
       }
@@ -66,6 +183,7 @@ export default function RegisterPage() {
             name: data.name,
             shopName: data.shopName,
             phone: fullPhoneNumber,
+            industryNames: data.industryNames,
           }),
         }
       );
@@ -76,7 +194,6 @@ export default function RegisterPage() {
         throw new Error(result.error || '회원가입에 실패했습니다');
       }
 
-      // Success
       alert('회원가입이 완료되었습니다!\n로그인 페이지로 이동합니다.');
       router.push('/login');
     } catch (err: any) {
@@ -114,19 +231,53 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Input
-              label="이메일"
-              type="email"
-              placeholder="email@example.com"
-              {...register('email', {
-                required: '이메일을 입력해주세요',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: '올바른 이메일 형식이 아닙니다',
-                },
-              })}
-              error={errors.email?.message}
-            />
+            {/* Email with Duplicate Check */}
+            <div>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <Input
+                    label="이메일"
+                    type="email"
+                    placeholder="email@example.com"
+                    className="mb-0" // Remove default mb-4 for alignment
+                    {...register('email', {
+                      required: '이메일을 입력해주세요',
+                      pattern: {
+                        value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                        message: '올바른 이메일 형식이 아닙니다',
+                      },
+                      onChange: () => {
+                        setEmailStatus('idle'); // Reset checking on change
+                        setEmailMessage('');
+                      },
+                    })}
+                    error={errors.email?.message}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => checkDuplicate('email', email)}
+                  disabled={emailStatus === 'checking' || !email}
+                  className="mb-[2px] h-[42px]" // Align with input
+                >
+                  {emailStatus === 'checking' ? (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  ) : (
+                    '중복확인'
+                  )}
+                </Button>
+              </div>
+              {emailMessage && (
+                <p
+                  className={`text-xs mt-1 ${getStatusColor(
+                    emailStatus
+                  )} flex items-center gap-1`}
+                >
+                  {getStatusIcon(emailStatus)} {emailMessage}
+                </p>
+              )}
+            </div>
 
             <Input
               label="이름 (원장님 성함)"
@@ -138,20 +289,88 @@ export default function RegisterPage() {
               error={errors.name?.message}
             />
 
-            <Input
-              label="매장 이름"
-              type="text"
-              placeholder="헤어샵_강남점"
-              {...register('shopName', {
-                required: '매장 이름을 입력해주세요',
-                pattern: {
-                  value: /^[a-zA-Z0-9_가-힣]+$/,
-                  message:
-                    '한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다 (띄어쓰기, 하이픈 불가)',
-                },
-              })}
-              error={errors.shopName?.message}
-            />
+            {/* Shop Name with Duplicate Check */}
+            <div>
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <Input
+                    label="매장 이름"
+                    type="text"
+                    placeholder="헤어샵_강남점"
+                    className="mb-0"
+                    {...register('shopName', {
+                      required: '매장 이름을 입력해주세요',
+                      pattern: {
+                        value: /^[a-zA-Z0-9_가-힣]+$/,
+                        message:
+                          '한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다 (띄어쓰기, 하이픈 불가)',
+                      },
+                      onChange: () => {
+                        setShopNameStatus('idle');
+                        setShopNameMessage('');
+                      },
+                    })}
+                    error={errors.shopName?.message}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => checkDuplicate('shopName', shopName)}
+                  disabled={shopNameStatus === 'checking' || !shopName}
+                  className="mb-[2px] h-[42px]"
+                >
+                  {shopNameStatus === 'checking' ? (
+                    <Loader2 className="animate-spin w-4 h-4" />
+                  ) : (
+                    '중복확인'
+                  )}
+                </Button>
+              </div>
+              {shopNameMessage && (
+                <p
+                  className={`text-xs mt-1 ${getStatusColor(
+                    shopNameStatus
+                  )} flex items-center gap-1`}
+                >
+                  {getStatusIcon(shopNameStatus)} {shopNameMessage}
+                </p>
+              )}
+            </div>
+
+            {/* Industry Selection */}
+            <div>
+              <label className="block text-sm font-medium text-secondary-700 mb-2">
+                업종 (다중 선택 가능)
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {INDUSTRIES.map((ind) => {
+                  const isSelected = industryNames?.includes(ind.value);
+                  return (
+                    <button
+                      key={ind.value}
+                      type="button"
+                      onClick={() => toggleIndustry(ind.value)}
+                      className={`flex items-center justify-center gap-2 p-3 rounded-md border text-sm font-medium transition-all
+                        ${
+                          isSelected
+                            ? 'border-primary-600 bg-primary-50 text-primary-700'
+                            : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                        }
+                      `}
+                    >
+                      {ind.label}
+                      {isSelected && <Check className="w-4 h-4" />}
+                    </button>
+                  );
+                })}
+              </div>
+              {industryNames?.length === 0 && (
+                <p className="text-xs text-gray-500 mt-1">
+                  * 최소 하나 이상 선택해주세요.
+                </p>
+              )}
+            </div>
 
             <div>
               <label className="block text-sm font-medium text-secondary-700 mb-1">
@@ -215,6 +434,9 @@ export default function RegisterPage() {
               variant="primary"
               className="w-full mt-4"
               isLoading={isLoading}
+              disabled={
+                emailStatus !== 'available' || shopNameStatus !== 'available'
+              }
             >
               회원가입 완료
             </Button>

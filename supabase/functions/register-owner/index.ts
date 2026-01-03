@@ -14,7 +14,8 @@ serve(async (req) => {
 
   try {
     // 1. Get the request body
-    const { email, password, name, shopName, phone } = await req.json();
+    const reqBody = await req.json();
+    const { email, password, name, shopName, phone } = reqBody;
 
     if (!email || !password || !name || !shopName || !phone) {
       throw new Error(
@@ -41,7 +42,7 @@ serve(async (req) => {
     // 1.5 Validate Duplicates
     // Check Shop Name
     const { data: existingShop } = await supabaseAdmin
-      .from('shops')
+      .from('salons')
       .select('id')
       .eq('name', shopName)
       .maybeSingle();
@@ -50,9 +51,9 @@ serve(async (req) => {
       throw new Error('이미 사용 중인 매장 이름입니다.');
     }
 
-    // Check Phone (in shops table)
+    // Check Phone (in salons table)
     const { data: existingPhoneShop } = await supabaseAdmin
-      .from('shops')
+      .from('salons')
       .select('id')
       .eq('phone', phone)
       .maybeSingle();
@@ -107,9 +108,9 @@ serve(async (req) => {
 
     // No email handling needed as we are auto-verifying.
 
-    // 4. Create Shop
-    const { data: shopData, error: shopError } = await supabaseAdmin
-      .from('shops')
+    // 4. Create Salon (Renamed from Shop)
+    const { data: salonData, error: salonError } = await supabaseAdmin
+      .from('salons')
       .insert({
         name: shopName,
         email: email,
@@ -118,41 +119,72 @@ serve(async (req) => {
         address: '',
         city: '',
         country: '', // Defaulting to KR for Korean UI context
+        // default type is 'HAIR', but we rely on industries logic now
       })
       .select('id')
       .single();
 
-    if (shopError) {
+    if (salonError) {
       // Rollback auth user creation
       await supabaseAdmin.auth.admin.deleteUser(userId);
-      throw shopError;
+      throw salonError;
     }
 
-    const shopId = shopData.id;
+    const salonId = salonData.id;
 
-    // 5. Update User with Shop ID (Trigger already created the row)
+    // 4.5 Insert Salon Industries
+    if (reqBody.industryNames && Array.isArray(reqBody.industryNames)) {
+      const industryNames = reqBody.industryNames;
+
+      // Get industry IDs for the names
+      const { data: industriesData } = await supabaseAdmin
+        .from('industries')
+        .select('id, name')
+        .in('name', industryNames);
+
+      if (industriesData && industriesData.length > 0) {
+        const salonIndustriesRows = industriesData.map((ind: any) => ({
+          salon_id: salonId,
+          industry_id: ind.id,
+        }));
+
+        const { error: industriesError } = await supabaseAdmin
+          .from('salon_industries')
+          .insert(salonIndustriesRows);
+
+        if (industriesError) {
+          console.error('Error inserting industries:', industriesError);
+          // Rollback all
+          await supabaseAdmin.from('salons').delete().eq('id', salonId);
+          await supabaseAdmin.auth.admin.deleteUser(userId);
+          throw new Error(
+            'Failed to save industries: ' + industriesError.message
+          );
+        }
+      }
+    }
+
+    // 5. Update User with Salon ID
     const { error: userError } = await supabaseAdmin
       .from('users')
       .update({
-        shop_id: shopId,
+        salon_id: salonId,
         is_active: true,
         is_approved: false,
-        phone: phone, // Save to Public User Profile
-        // user_type and role were set by trigger based on metadata
+        phone: phone,
       })
       .eq('id', userId);
 
     if (userError) {
       // Rollback
-      await supabaseAdmin.from('shops').delete().eq('id', shopId);
+      await supabaseAdmin.from('salons').delete().eq('id', salonId);
       await supabaseAdmin.auth.admin.deleteUser(userId);
       throw userError;
     }
 
-    // 6. Update Admin Profile Permissions (Trigger already created the row with defaults)
-    // We want to give Owners full access
+    // 6. Update Admin Profile Permissions
     const { error: profileError } = await supabaseAdmin
-      .from('admin_profiles')
+      .from('staff_profiles')
       .update({
         permissions: {
           bookings: { view: true, create: true, edit: true, delete: true },
@@ -167,7 +199,10 @@ serve(async (req) => {
 
     if (profileError) {
       console.error('Error creating admin profile:', profileError);
-      // We might continue even if this fails, or strict rollback.
+      // Rollback
+      await supabaseAdmin.from('salons').delete().eq('id', salonId);
+      await supabaseAdmin.auth.admin.deleteUser(userId);
+      throw new Error('Failed to set permissions: ' + profileError.message);
     }
 
     // 7. Email is sent automatically by Supabase (via Dashboard SMTP settings)
@@ -176,7 +211,7 @@ serve(async (req) => {
       JSON.stringify({
         message: 'Owner registered successfully (Verification email sent)',
         user: authData.user,
-        shopId: shopId,
+        salonId: salonId,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -19,8 +19,8 @@ CREATE TABLE users (
   auth_provider auth_provider NOT NULL DEFAULT 'EMAIL',
   provider_user_id TEXT, -- ID from social provider (LINE, Google, etc.)
 
-  -- Shop association (NULL for SUPER_ADMIN, required for others)
-  shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+  -- Salon association (NULL for SUPER_ADMIN, required for others)
+  salon_id UUID REFERENCES salons(id) ON DELETE CASCADE,
 
   -- Hierarchy tracking
   created_by UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -40,11 +40,11 @@ CREATE TABLE users (
 
   -- Constraints
   CONSTRAINT valid_user_type_role CHECK (
-    (user_type = 'ADMIN_USER' AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF', 'DESIGNER')) OR
+    (user_type = 'ADMIN_USER' AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF')) OR
     (user_type = 'CUSTOMER' AND role = 'CUSTOMER')
   ),
-  CONSTRAINT super_admin_no_shop CHECK (
-    (role = 'SUPER_ADMIN' AND shop_id IS NULL) OR
+  CONSTRAINT super_admin_no_salon CHECK (
+    (role = 'SUPER_ADMIN' AND salon_id IS NULL) OR
     (role != 'SUPER_ADMIN')
   ),
   UNIQUE (id, user_type) -- Added for composite FK reference
@@ -52,7 +52,7 @@ CREATE TABLE users (
 
 -- Indexes
 CREATE INDEX idx_users_email ON users(email) WHERE deleted_at IS NULL;
-CREATE INDEX idx_users_shop_id ON users(shop_id) WHERE deleted_at IS NULL;
+CREATE INDEX idx_users_salon_id ON users(salon_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_user_type ON users(user_type) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_role ON users(role) WHERE deleted_at IS NULL;
 CREATE INDEX idx_users_created_by ON users(created_by);
@@ -62,7 +62,7 @@ CREATE INDEX idx_users_approval ON users(is_approved, user_type) WHERE user_type
 -- Comments
 COMMENT ON TABLE users IS 'Unified users table for both admin users and customers';
 COMMENT ON COLUMN users.user_type IS 'Discriminator: ADMIN_USER or CUSTOMER';
-COMMENT ON COLUMN users.role IS 'System-level role for permissions (SUPER_ADMIN, ADMIN, MANAGER, STAFF, DESIGNER, CUSTOMER)';
+COMMENT ON COLUMN users.role IS 'System-level role for permissions (SUPER_ADMIN, ADMIN, MANAGER, STAFF, CUSTOMER)';
 COMMENT ON COLUMN users.is_approved IS 'Approval status for admin users (customers auto-approved)';
 COMMENT ON COLUMN users.auth_provider IS 'Authentication method used';
 COMMENT ON COLUMN users.created_by IS 'User ID who created this account (for hierarchy tracking)';

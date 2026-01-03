@@ -16,7 +16,7 @@ export const th = {
     success: 'สำเร็จ',
     noData: 'ไม่มีข้อมูล',
   },
-  
+
   auth: {
     login: 'เข้าสู่ระบบ',
     logout: 'ออกจากระบบ',
@@ -37,6 +37,7 @@ export const th = {
     chat: 'แชท',
     settings: 'การตั้งค่า',
     users: 'ผู้ใช้',
+    employee: 'พนักงาน',
     salons: 'ร้านเสริมสวย',
   },
 
@@ -74,8 +75,8 @@ export const th = {
     addCustomer: 'เพิ่มลูกค้า',
   },
 
-  designer: {
-    title: 'จัดการช่างทำผม',
+  employee: {
+    title: 'จัดการพนักงาน',
     name: 'ชื่อ',
     experience: 'ประสบการณ์',
     specialties: 'ความเชี่ยวชาญ',
@@ -85,7 +86,7 @@ export const th = {
     active: 'ใช้งาน',
     inactive: 'ไม่ใช้งาน',
     permissions: 'สิทธิ์การเข้าถึง',
-    addDesigner: 'เพิ่มช่างทำผม',
+    addEmployee: 'เพิ่มพนักงาน',
   },
 
   service: {

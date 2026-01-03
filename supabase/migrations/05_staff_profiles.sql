@@ -1,12 +1,12 @@
 -- ============================================
--- Admin Profiles Table
+-- Staff Profiles Table
 -- ============================================
 
-CREATE TABLE admin_profiles (
+CREATE TABLE staff_profiles (
   user_id UUID PRIMARY KEY,
   user_type user_type NOT NULL DEFAULT 'ADMIN_USER',
 
-  -- Position (customizable by shop)
+  -- Position (customizable by salon)
   position_id UUID REFERENCES staff_positions(id) ON DELETE SET NULL,
 
   -- Custom permissions (JSONB for flexibility)
@@ -48,15 +48,15 @@ CREATE TABLE admin_profiles (
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
   -- Ensure this profile is only for ADMIN_USER
-  CONSTRAINT admin_user_type_check CHECK (user_type = 'ADMIN_USER'),
+  CONSTRAINT staff_user_type_check CHECK (user_type = 'ADMIN_USER'),
   FOREIGN KEY (user_id, user_type) REFERENCES users(id, user_type) ON DELETE CASCADE
 );
 
 -- Indexes
-CREATE INDEX idx_admin_profiles_position ON admin_profiles(position_id);
+CREATE INDEX idx_staff_profiles_position ON staff_profiles(position_id);
 
 -- Comments
-COMMENT ON TABLE admin_profiles IS 'Additional profile data for admin users (staff, managers, designers)';
-COMMENT ON COLUMN admin_profiles.position_id IS 'Reference to customizable staff position';
-COMMENT ON COLUMN admin_profiles.permissions IS 'JSONB custom permissions for granular access control';
-COMMENT ON COLUMN admin_profiles.social_links IS 'Social media links (Instagram, TikTok, YouTube, etc.)';
+COMMENT ON TABLE staff_profiles IS 'Additional profile data for staff users (admins, managers, staff)';
+COMMENT ON COLUMN staff_profiles.position_id IS 'Reference to customizable staff position';
+COMMENT ON COLUMN staff_profiles.permissions IS 'JSONB custom permissions for granular access control';
+COMMENT ON COLUMN staff_profiles.social_links IS 'Social media links (Instagram, TikTok, YouTube, etc.)';

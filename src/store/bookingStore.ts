@@ -10,7 +10,7 @@ interface BookingState {
   cancelBooking: (id: string) => void;
   setSelectedDate: (date: Date) => void;
   getBookingsByDate: (date: Date) => Booking[];
-  getBookingsByDesigner: (designerId: string) => Booking[];
+  getBookingsByStaff: (staffId: string) => Booking[];
 }
 
 export const useBookingStore = create<BookingState>((set, get) => ({
@@ -52,8 +52,8 @@ export const useBookingStore = create<BookingState>((set, get) => ({
     });
   },
 
-  getBookingsByDesigner: (designerId) => {
+  getBookingsByStaff: (staffId) => {
     const bookings = get().bookings;
-    return bookings.filter((b) => b.designerId === designerId);
+    return bookings.filter((b) => b.staffId === staffId);
   },
 }));

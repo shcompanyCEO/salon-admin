@@ -11,6 +11,7 @@ export const endpoints = {
     register: () => ['/auth/register'] as const,
     forgotPassword: () => ['/auth/forgot-password'] as const,
     resetPassword: () => ['/auth/reset-password'] as const,
+    me: () => ['auth', 'me'] as const,
   },
 
   // 살롱
@@ -19,9 +20,9 @@ export const endpoints = {
     detail: (id: string) => ['/salons', id] as const,
     approve: (id: string) => [`/salons/${id}/approve`] as const,
 
-    // 살롱 내 디자이너
-    designers: (salonId: string, params?: any) =>
-      [`/salons/${salonId}/designers`, params] as const,
+    // 살롱 내 직원(Staff)
+    staff: (salonId: string, params?: any) =>
+      [`/salons/${salonId}/staff`, params] as const,
 
     // 살롱 내 서비스
     services: (salonId: string, params?: any) =>
@@ -36,12 +37,12 @@ export const endpoints = {
       [`/salons/${salonId}/sales`, params] as const,
   },
 
-  // 디자이너
-  designers: {
-    all: (params?: any) => ['/designers', params] as const,
-    detail: (id: string) => ['/designers', id] as const,
-    sales: (designerId: string, params: any) =>
-      [`/designers/${designerId}/sales`, params] as const,
+  // 직원(Staff)
+  staff: {
+    all: (params?: any) => ['/staff', params] as const,
+    detail: (id: string) => ['/staff', id] as const,
+    sales: (staffId: string, params: any) =>
+      [`/staff/${staffId}/sales`, params] as const,
   },
 
   // 서비스
@@ -94,7 +95,7 @@ export const endpoints = {
 export const queryKeys = {
   auth: ['auth'] as const,
   salons: ['salons'] as const,
-  designers: ['designers'] as const,
+  staff: ['staff'] as const,
   services: ['services'] as const,
   bookings: ['bookings'] as const,
   customers: ['customers'] as const,

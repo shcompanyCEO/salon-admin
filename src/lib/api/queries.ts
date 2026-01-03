@@ -6,7 +6,21 @@
 import { useQuery, UseQueryOptions } from '@tanstack/react-query';
 import { apiClient } from './client';
 import { endpoints } from './endpoints';
-import { ApiResponse } from '@/types';
+import { ApiResponse, User } from '@/types';
+import { getCurrentUser } from '@/lib/auth';
+
+// ============================================
+// 인증 Queries
+// ============================================
+
+export const useUser = (options?: UseQueryOptions<User | null>) => {
+  return useQuery({
+    queryKey: endpoints.auth.me(),
+    queryFn: () => getCurrentUser(),
+    staleTime: 1000 * 60 * 5, // 5분
+    ...options,
+  });
+};
 
 // ============================================
 // 살롱 Queries
@@ -30,40 +44,40 @@ export const useSalon = (id: string, options?: UseQueryOptions) => {
 };
 
 // ============================================
-// 디자이너 Queries
+// 직원(Staff) Queries
 // ============================================
 
-export const useDesigners = (
+export const useStaff = (
   salonId: string,
   params?: any,
   options?: UseQueryOptions
 ) => {
   return useQuery({
-    queryKey: endpoints.salons.designers(salonId, params),
-    queryFn: () => apiClient.get(`/salons/${salonId}/designers`, params),
+    queryKey: endpoints.salons.staff(salonId, params), // Updated key
+    queryFn: () => apiClient.get(`/salons/${salonId}/staff`, params), // Updated path
     enabled: !!salonId,
     ...options,
   });
 };
 
-export const useDesigner = (id: string, options?: UseQueryOptions) => {
+export const useStaffMember = (id: string, options?: UseQueryOptions) => {
   return useQuery({
-    queryKey: endpoints.designers.detail(id),
-    queryFn: () => apiClient.get(`/designers/${id}`),
+    queryKey: endpoints.staff.detail(id), // Updated key
+    queryFn: () => apiClient.get(`/staff/${id}`), // Updated path
     enabled: !!id,
     ...options,
   });
 };
 
-export const useDesignerSales = (
-  designerId: string,
+export const useStaffSales = (
+  staffId: string,
   params: any,
   options?: UseQueryOptions
 ) => {
   return useQuery({
-    queryKey: endpoints.designers.sales(designerId, params),
-    queryFn: () => apiClient.get(`/designers/${designerId}/sales`, params),
-    enabled: !!designerId,
+    queryKey: endpoints.staff.sales(staffId, params), // Updated key
+    queryFn: () => apiClient.get(`/staff/${staffId}/sales`, params), // Updated path
+    enabled: !!staffId,
     ...options,
   });
 };

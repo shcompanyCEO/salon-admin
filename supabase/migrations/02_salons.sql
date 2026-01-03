@@ -8,10 +8,10 @@ CREATE TABLE industries (
 );
 
 -- ============================================
--- Shops Table
+-- Salons Table
 -- ============================================
 
-CREATE TABLE shops (
+CREATE TABLE salons (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 
   -- Basic info
@@ -42,7 +42,7 @@ CREATE TABLE shops (
     "sunday": {"enabled": false, "open": null, "close": null}
   }'::jsonb,
 
-  -- Media (Logo and Cover only, others in shop_images)
+  -- Media (Logo and Cover only, others in salon_images)
   logo_url TEXT,
   cover_image_url TEXT,
 
@@ -67,36 +67,36 @@ CREATE TABLE shops (
 );
 
 -- Indexes
-CREATE INDEX idx_shops_active ON shops(is_active) WHERE deleted_at IS NULL;
-CREATE INDEX idx_shops_location ON shops(latitude, longitude) WHERE deleted_at IS NULL;
-CREATE INDEX idx_shops_approval ON shops(approval_status);
+CREATE INDEX idx_salons_active ON salons(is_active) WHERE deleted_at IS NULL;
+CREATE INDEX idx_salons_location ON salons(latitude, longitude) WHERE deleted_at IS NULL;
+CREATE INDEX idx_salons_approval ON salons(approval_status);
 
 -- Comments
-COMMENT ON TABLE shops IS 'Beauty shop/salon information';
+COMMENT ON TABLE salons IS 'Beauty salon information';
 
 -- ============================================
--- Shop Industries (Many-to-Many)
+-- Salon Industries (Many-to-Many)
 -- ============================================
-CREATE TABLE shop_industries (
+CREATE TABLE salon_industries (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+    salon_id UUID REFERENCES salons(id) ON DELETE CASCADE,
     industry_id UUID REFERENCES industries(id) ON DELETE CASCADE,
-    UNIQUE (shop_id, industry_id)
+    UNIQUE (salon_id, industry_id)
 );
 
-CREATE INDEX idx_shop_industries_shop ON shop_industries(shop_id);
-CREATE INDEX idx_shop_industries_industry ON shop_industries(industry_id);
+CREATE INDEX idx_salon_industries_salon ON salon_industries(salon_id);
+CREATE INDEX idx_salon_industries_industry ON salon_industries(industry_id);
 
 -- ============================================
--- Shop Images (Gallery)
+-- Salon Images (Gallery)
 -- ============================================
-CREATE TABLE shop_images (
+CREATE TABLE salon_images (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    shop_id UUID REFERENCES shops(id) ON DELETE CASCADE,
+    salon_id UUID REFERENCES salons(id) ON DELETE CASCADE,
     image_url TEXT NOT NULL,
     caption TEXT,
     display_order INTEGER DEFAULT 0,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
-CREATE INDEX idx_shop_images_shop ON shop_images(shop_id);
+CREATE INDEX idx_salon_images_salon ON salon_images(salon_id);

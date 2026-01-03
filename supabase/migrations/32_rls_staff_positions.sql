@@ -9,12 +9,12 @@ CREATE POLICY "Anyone can view active positions"
   ON staff_positions FOR SELECT
   USING (is_active = true);
 
--- Shop admins can manage positions
-CREATE POLICY "Shop admins can manage positions"
+-- Salon admins can manage positions
+CREATE POLICY "Salon admins can manage positions"
   ON staff_positions FOR ALL
   USING (
-    shop_id IN (
-      SELECT shop_id FROM users
+    salon_id IN (
+      SELECT salon_id FROM users
       WHERE id = auth.uid() AND role IN ('SUPER_ADMIN', 'ADMIN', 'MANAGER')
     )
   );

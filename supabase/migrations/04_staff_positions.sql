@@ -1,10 +1,10 @@
 -- ============================================
--- Staff Positions Table (customizable per shop)
+-- Staff Positions Table (customizable per salon)
 -- ============================================
 
 CREATE TABLE staff_positions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  shop_id UUID NOT NULL REFERENCES shops(id) ON DELETE CASCADE,
+  salon_id UUID NOT NULL REFERENCES salons(id) ON DELETE CASCADE,
 
   -- Position info
   name TEXT NOT NULL,           -- "디렉터", "스페셜 디렉터", "주니어"
@@ -25,13 +25,13 @@ CREATE TABLE staff_positions (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 
-  UNIQUE(shop_id, name)
+  UNIQUE(salon_id, name)
 );
 
 -- Indexes
-CREATE INDEX idx_staff_positions_shop ON staff_positions(shop_id) WHERE is_active = true;
-CREATE INDEX idx_staff_positions_level ON staff_positions(shop_id, level);
+CREATE INDEX idx_staff_positions_salon ON staff_positions(salon_id) WHERE is_active = true;
+CREATE INDEX idx_staff_positions_level ON staff_positions(salon_id, level);
 
 -- Comments
-COMMENT ON TABLE staff_positions IS 'Customizable staff positions per shop (디렉터, 스페셜 디렉터, etc.)';
+COMMENT ON TABLE staff_positions IS 'Customizable staff positions per salon (디렉터, 스페셜 디렉터, etc.)';
 COMMENT ON COLUMN staff_positions.level IS 'Hierarchy level for pricing (1=lowest, higher=more expensive)';
