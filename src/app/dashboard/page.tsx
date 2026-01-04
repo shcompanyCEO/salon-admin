@@ -40,7 +40,6 @@ export default function DashboardPage() {
     completedBookings: 234,
     cancelledBookings: 12,
   });
-  console.log('sean 1111111', user);
 
   const statCards = [
     {

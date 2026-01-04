@@ -33,7 +33,7 @@ export default function InviteStaffModal({
       } = await supabase.auth.getSession();
 
       if (!session) {
-        throw new Error('You must be logged in to invite staff.');
+        throw new Error('직원을 초대하려면 로그인해야 합니다.');
       }
 
       const result = await inviteStaff({
@@ -66,7 +66,7 @@ export default function InviteStaffModal({
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Invite New Staff" size="md">
+    <Modal isOpen={isOpen} onClose={onClose} title="직원 초대" size="md">
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm">
@@ -79,7 +79,7 @@ export default function InviteStaffModal({
             htmlFor="email"
             className="block text-sm font-medium text-gray-700"
           >
-            Email Address
+            이메일 주소
           </label>
           <input
             id="email"
@@ -88,7 +88,7 @@ export default function InviteStaffModal({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="staff@example.com"
+            placeholder="example@salon.com"
           />
         </div>
 
@@ -97,7 +97,7 @@ export default function InviteStaffModal({
             htmlFor="name"
             className="block text-sm font-medium text-gray-700"
           >
-            Full Name
+            이름
           </label>
           <input
             id="name"
@@ -106,7 +106,7 @@ export default function InviteStaffModal({
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-            placeholder="Jane Doe"
+            placeholder="홍길동"
           />
         </div>
 
@@ -115,7 +115,7 @@ export default function InviteStaffModal({
             htmlFor="role"
             className="block text-sm font-medium text-gray-700"
           >
-            Role
+            역할
           </label>
           <select
             id="role"
@@ -123,12 +123,12 @@ export default function InviteStaffModal({
             onChange={(e) => setRole(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
           >
-            <option value="STAFF">Staff</option>
-            <option value="MANAGER">Manager</option>
-            <option value="ADMIN">Admin</option>
+            <option value="STAFF">직원 (Staff)</option>
+            <option value="MANAGER">매니저 (Manager)</option>
+            <option value="ADMIN">관리자 (Admin)</option>
           </select>
           <p className="text-xs text-gray-500">
-            This determines their access level in the system.
+            시스템 접근 권한을 결정합니다.
           </p>
         </div>
 
@@ -139,14 +139,14 @@ export default function InviteStaffModal({
             className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
             disabled={loading}
           >
-            Cancel
+            취소
           </button>
           <button
             type="submit"
             disabled={loading}
             className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors disabled:opacity-50"
           >
-            {loading ? 'Sending...' : 'Send Invitation'}
+            {loading ? '발송 중...' : '초대장 발송'}
           </button>
         </div>
       </form>

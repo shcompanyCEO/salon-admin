@@ -85,6 +85,9 @@ export interface Staff {
   permissions: StaffPermission[];
   createdAt: Date;
   updatedAt: Date;
+  // Extended fields from User
+  phone?: string;
+  role?: UserRole;
 }
 
 // 직원 권한

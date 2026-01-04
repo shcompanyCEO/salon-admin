@@ -1,72 +1,39 @@
 'use client';
 
 import React, { useState } from 'react';
-import { supabase } from '@/lib/supabase';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import {
-  Edit2,
-  Trash2,
-  Plus,
-  X,
-  ChevronDown,
-  ChevronRight,
-  Save,
-} from 'lucide-react';
-
-interface Category {
-  id: string;
-  name: string;
-  description?: string;
-  display_order: number;
-}
+import { Plus, Trash2, ChevronDown, ChevronRight, X } from 'lucide-react';
+import { useCategories, useServices } from '../../hooks/useSalonServices';
+import { ServiceCategory, ServiceMenu } from '../../types';
 
 interface ServiceListProps {
   salonId: string;
 }
 
 export default function ServiceList({ salonId }: ServiceListProps) {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  const {
+    data: categories = [],
+    isLoading,
+    createCategory,
+    deleteCategory,
+  } = useCategories(salonId);
 
-  // Create Category State
   const [isCreating, setIsCreating] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
 
-  // Fetch Categories on mount
-  React.useEffect(() => {
-    fetchCategories();
-  }, [salonId]);
-
-  const fetchCategories = async () => {
-    setIsLoading(true);
-    const { data } = await supabase
-      .from('service_categories')
-      .select('*')
-      .eq('salon_id', salonId)
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-
-    if (data) setCategories(data);
-    setIsLoading(false);
-  };
-
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) return;
-
-    const { error } = await supabase.from('service_categories').insert({
-      salon_id: salonId,
-      name: newCategoryName,
-      display_order: categories.length + 1, // Simple append
-    });
-
-    if (error) {
-      console.error('Error creating category:', error);
-      alert('카테고리 생성 실패');
-    } else {
+    try {
+      await createCategory({
+        name: newCategoryName,
+        displayOrder: categories.length + 1,
+      });
       setNewCategoryName('');
       setIsCreating(false);
-      fetchCategories();
+    } catch (e) {
+      console.error(e);
+      alert('카테고리 생성 실패');
     }
   };
 
@@ -77,17 +44,11 @@ export default function ServiceList({ salonId }: ServiceListProps) {
       )
     )
       return;
-
-    const { error } = await supabase
-      .from('service_categories')
-      .update({ is_active: false, deleted_at: new Date() }) // Soft delete
-      .eq('id', id);
-
-    if (error) {
-      console.error('Error deleting category:', error);
+    try {
+      await deleteCategory(id);
+    } catch (e) {
+      console.error(e);
       alert('삭제 실패');
-    } else {
-      fetchCategories();
     }
   };
 
@@ -154,36 +115,23 @@ export default function ServiceList({ salonId }: ServiceListProps) {
   );
 }
 
-// Sub-component for each category row (Accordion)
 function CategoryItem({
   category,
   salonId,
   onDelete,
 }: {
-  category: Category;
+  category: ServiceCategory;
   salonId: string;
   onDelete: () => void;
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [services, setServices] = useState<any[]>([]);
-  const [isLoadingServices, setIsLoadingServices] = useState(false);
 
-  // Fetch services when opening accordion
-  const fetchServices = async () => {
-    setIsLoadingServices(true);
-    const { data } = await supabase
-      .from('services')
-      .select('*')
-      .eq('category_id', category.id)
-      .eq('is_active', true)
-      .order('display_order', { ascending: true });
-
-    if (data) setServices(data);
-    setIsLoadingServices(false);
-  };
+  const { data: services = [], isLoading } = useServices(
+    salonId,
+    isOpen ? category.id : ''
+  );
 
   const toggleOpen = () => {
-    if (!isOpen) fetchServices();
     setIsOpen(!isOpen);
   };
 
@@ -221,14 +169,13 @@ function CategoryItem({
 
       {isOpen && (
         <div className="p-4 border-t border-gray-200 bg-white">
-          {isLoadingServices ? (
+          {isLoading ? (
             <div className="text-sm text-gray-500">로딩 중...</div>
           ) : (
             <ServiceItems
               services={services}
               salonId={salonId}
               categoryId={category.id}
-              onUpdate={fetchServices}
             />
           )}
         </div>
@@ -237,18 +184,16 @@ function CategoryItem({
   );
 }
 
-// Sub-component for Services within a category
 function ServiceItems({
   services,
   salonId,
   categoryId,
-  onUpdate,
 }: {
-  services: any[];
+  services: ServiceMenu[];
   salonId: string;
   categoryId: string;
-  onUpdate: () => void;
 }) {
+  const { createService, deleteService } = useServices(salonId, categoryId);
   const [isAdding, setIsAdding] = useState(false);
   const [newService, setNewService] = useState({
     name: '',
@@ -258,30 +203,28 @@ function ServiceItems({
 
   const handleAddService = async () => {
     if (!newService.name) return;
-
-    const { error } = await supabase.from('services').insert({
-      salon_id: salonId,
-      category_id: categoryId,
-      name: newService.name,
-      duration_minutes: newService.duration,
-      pricing_type: 'FIXED', // Default simplified for MVP
-      base_price: parseFloat(newService.price) || 0,
-    });
-
-    if (error) {
-      console.error(error);
-      alert('서비스 추가 실패');
-    } else {
+    try {
+      await createService({
+        name: newService.name,
+        duration: newService.duration,
+        price: newService.price,
+      });
       setNewService({ name: '', price: '', duration: 60 });
       setIsAdding(false);
-      onUpdate();
+    } catch (e) {
+      console.error(e);
+      alert('서비스 추가 실패');
     }
   };
 
   const handleDeleteService = async (id: string) => {
     if (!confirm('삭제하시겠습니까?')) return;
-    await supabase.from('services').update({ is_active: false }).eq('id', id);
-    onUpdate();
+    try {
+      await deleteService(id);
+    } catch (e) {
+      console.error(e);
+      alert('삭제 실패');
+    }
   };
 
   return (
@@ -301,7 +244,7 @@ function ServiceItems({
               <td className="px-3 py-2 font-medium">{svc.name}</td>
               <td className="px-3 py-2">{svc.duration_minutes}분</td>
               <td className="px-3 py-2">
-                {Number(svc.base_price).toLocaleString()}원
+                {Number(svc.base_price || svc.price).toLocaleString()}원
               </td>
               <td className="px-3 py-2 text-right">
                 <button
@@ -313,7 +256,6 @@ function ServiceItems({
               </td>
             </tr>
           ))}
-          {/* Add Row */}
           {isAdding && (
             <tr className="bg-blue-50">
               <td className="px-2 py-2">

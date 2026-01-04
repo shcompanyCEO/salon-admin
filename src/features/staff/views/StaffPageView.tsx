@@ -1,0 +1,277 @@
+'use client';
+
+import React, { useState } from 'react';
+import { Layout } from '@/components/layout/Layout';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { useTranslation } from '@/locales/useTranslation';
+import { useAuthStore } from '@/store/authStore';
+import { Staff } from '../types';
+import { useStaff } from '../hooks/useStaff';
+import InviteStaffModal from './components/InviteStaffModal';
+import StaffPermissionModal from './components/StaffPermissionModal';
+
+export default function StaffPageView() {
+  const { t } = useTranslation();
+  const { user } = useAuthStore();
+  const {
+    data: response,
+    isLoading,
+    error,
+    updateStaff,
+  } = useStaff(user?.salonId || '', {
+    enabled: !!user?.salonId,
+  });
+
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+
+  const staffMembers = response?.data || [];
+  const filteredStaff = staffMembers.filter(
+    (member: Staff) => member.salonId === user?.salonId
+  );
+
+  const handleUpdateStaff = async (
+    staffId: string,
+    updates: Partial<Staff>
+  ) => {
+    try {
+      await updateStaff({ staffId, updates });
+    } catch (err) {
+      console.error(err);
+      alert('업데이트에 실패했습니다');
+    }
+  };
+
+  const formatPhone = (phone?: string) => {
+    if (!phone) return '-';
+    return phone.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+  };
+
+  const formatDate = (dateString: Date) => {
+    const d = new Date(dateString);
+    const yy = d.getFullYear().toString().slice(2);
+    const m = d.getMonth() + 1;
+    const day = d.getDate();
+    return `${yy}. ${m}. ${day}`;
+  };
+
+  const getRoleName = (role?: string) => {
+    switch (role) {
+      case 'SUPER_ADMIN':
+        return '대표원장';
+      case 'ADMIN':
+        return '관리자';
+      case 'MANAGER':
+        return '매니저';
+      case 'STAFF':
+        return '담당자';
+      default:
+        return '담당자';
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+          <div className="text-secondary-500">{t('common.loading')}</div>
+        </div>
+      </Layout>
+    );
+  }
+
+  if (error) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+          <div className="text-red-500">
+            {t('common.error')}: {(error as Error).message}
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-xl font-bold text-secondary-900">
+              {t('staff.title')}
+            </h1>
+            <div className="text-sm text-secondary-600 mt-2 space-y-1">
+              <p>
+                • 직원 등록 방법은 직원이 공비서에 회원가입 후 샵 입사 신청을
+                하면, 원장님 승인 후 등록됩니다.
+              </p>
+              <p>
+                • 이름/닉네임 변경은 각 계정의 [마이페이지]에서 변경할 수
+                있습니다.
+              </p>
+            </div>
+          </div>
+          {/* <Button variant="outline" onClick={() => setShowInviteModal(true)}> ... </Button> */}
+        </div>
+
+        {/* Staff Table */}
+        <div className="bg-white rounded-lg border border-secondary-200">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-secondary-200">
+              <tr>
+                {[
+                  '번호',
+                  '이름/닉네임',
+                  '연락처',
+                  '입사일',
+                  '입사/퇴사',
+                  '관리 권한',
+                  '프로필',
+                  '직급/호칭',
+                  '공비서 앱 예약 받기',
+                ].map((header) => (
+                  <th
+                    key={header}
+                    className="px-6 py-4 text-center text-xs font-medium text-secondary-500 whitespace-nowrap"
+                  >
+                    {header}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-secondary-200">
+              {filteredStaff.map((member: Staff, index: number) => (
+                <tr key={member.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 text-center text-sm text-secondary-900">
+                    {index + 1}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <div className="flex items-center justify-center space-x-2">
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          member.isActive ? 'bg-cyan-400' : 'bg-gray-300'
+                        }`}
+                      />
+                      <span className="text-sm font-medium text-secondary-900">
+                        {member.name}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm text-secondary-600">
+                    {formatPhone(member.phone)}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm text-secondary-600">
+                    {formatDate(member.createdAt)}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {member.role !== 'SUPER_ADMIN' ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-red-500 border-red-200 hover:bg-red-50 h-8 px-3 text-xs"
+                        onClick={() => {
+                          if (confirm('퇴사 처리하시겠습니까?')) {
+                            handleUpdateStaff(member.id, { isActive: false });
+                          }
+                        }}
+                      >
+                        퇴사 처리
+                      </Button>
+                    ) : (
+                      <span className="text-secondary-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    {member.role === 'SUPER_ADMIN' ? (
+                      <Badge
+                        variant="default"
+                        className="bg-gray-100 text-gray-500 font-normal"
+                      >
+                        모든 권한
+                      </Badge>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="bg-gray-800 text-white hover:bg-gray-700 h-8 px-3 text-xs rounded-full border-transparent"
+                        onClick={() => {
+                          setSelectedStaff(member);
+                        }}
+                      >
+                        권한 설정
+                      </Button>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-center flex justify-center">
+                    {member.profileImage ? (
+                      <img
+                        src={member.profileImage}
+                        alt=""
+                        className="w-8 h-8 rounded-full"
+                      />
+                    ) : (
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-400">
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                          />
+                        </svg>
+                      </div>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm text-secondary-600">
+                    {getRoleName(member.role)}
+                  </td>
+                  <td className="px-6 py-4 text-center">
+                    <label className="relative inline-flex items-center cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        checked={member.isActive}
+                        onChange={() => {}}
+                      />
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                      <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
+                    </label>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Existing Modals */}
+        <InviteStaffModal
+          isOpen={showInviteModal}
+          onClose={() => setShowInviteModal(false)}
+          onSuccess={() => alert('초대장이 발송되었습니다!')}
+        />
+
+        {/* Permission Modal */}
+        {selectedStaff && (
+          <StaffPermissionModal
+            isOpen={!!selectedStaff}
+            onClose={() => setSelectedStaff(null)}
+            staff={selectedStaff}
+            onSave={async (id: string, perms: any[]) => {
+              // Now mapped to updateStaff from hook
+              // perms is StaffPermission[]
+              await handleUpdateStaff(id, { permissions: perms });
+              setSelectedStaff(null);
+            }}
+          />
+        )}
+      </div>
+    </Layout>
+  );
+}

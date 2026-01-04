@@ -14,12 +14,25 @@ serve(async (req) => {
 
   try {
     // 1. Get the request body
-    const reqBody = await req.json();
-    const { email, password, name, shopName, phone } = reqBody;
+    const reqBody = await req.json().catch((err) => {
+      console.error('JSON Parse Error:', err);
+      throw new Error('Invalid JSON body');
+    });
 
-    if (!email || !password || !name || !shopName || !phone) {
+    console.log('Register Request Body:', reqBody);
+
+    const { email, password, name, salonName, phone } = reqBody;
+
+    if (!email || !password || !name || !salonName || !phone) {
+      console.error('Missing required fields:', {
+        email,
+        password,
+        name,
+        salonName,
+        phone,
+      });
       throw new Error(
-        'Email, Password, Name, Shop Name, and Phone are required'
+        'Email, Password, Name, Shop Name (salonName), and Phone are required'
       );
     }
 
@@ -32,8 +45,8 @@ serve(async (req) => {
     );
 
     // 1.4 Validate Format
-    const shopNameRegex = /^[a-zA-Z0-9_가-힣]+$/;
-    if (!shopNameRegex.test(shopName)) {
+    const salonNameRegex = /^[a-zA-Z0-9_가-힣]+$/;
+    if (!salonNameRegex.test(salonName)) {
       throw new Error(
         '매장 이름은 한글, 영문, 숫자, 밑줄(_)만 사용 가능합니다 (띄어쓰기, 하이픈 불가)'
       );
@@ -44,7 +57,7 @@ serve(async (req) => {
     const { data: existingShop } = await supabaseAdmin
       .from('salons')
       .select('id')
-      .eq('name', shopName)
+      .eq('name', salonName)
       .maybeSingle();
 
     if (existingShop) {
@@ -112,7 +125,7 @@ serve(async (req) => {
     const { data: salonData, error: salonError } = await supabaseAdmin
       .from('salons')
       .insert({
-        name: shopName,
+        name: salonName,
         email: email,
         phone: phone,
         // Provide defaults for required fields NOT provided in UI

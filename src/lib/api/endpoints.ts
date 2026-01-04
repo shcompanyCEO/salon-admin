@@ -102,4 +102,5 @@ export const queryKeys = {
   reviews: ['reviews'] as const,
   chat: ['chat'] as const,
   upload: ['upload'] as const,
+  designers: ['designers'] as const,
 } as const;

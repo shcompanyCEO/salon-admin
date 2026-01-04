@@ -13,14 +13,26 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    );
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
-    const { type, value } = await req.json();
+    if (!supabaseUrl || !supabaseKey) {
+      console.error('Missing Environment Variables');
+      throw new Error('Server misconfiguration: Missing Supabase Env Vars');
+    }
+
+    const supabaseAdmin = createClient(supabaseUrl, supabaseKey);
+
+    const body = await req.json().catch((err) => {
+      console.error('JSON Parse Error:', err);
+      throw new Error('Invalid JSON body');
+    });
+
+    console.log('Received Check Duplicate Request:', body);
+    const { type, value } = body;
 
     if (!type || !value) {
+      console.error('Missing type or value:', body);
       throw new Error('Type and Value are required');
     }
 
@@ -28,11 +40,16 @@ serve(async (req) => {
       // Check users table (owned by auth, but checking public users table first for safety)
       // Actually strictly we should check auth.users via admin api usually, but checking 'users' table is good enough proxy if we sync well.
       // Let's check 'users' table as it is the public profile.
-      const { data } = await supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from('users')
         .select('id')
         .eq('email', value)
         .maybeSingle();
+
+      if (error) {
+        console.error('Database Error (Email):', error);
+        throw error;
+      }
 
       if (data) {
         return new Response(
@@ -46,10 +63,10 @@ serve(async (req) => {
           }
         );
       }
-    } else if (type === 'shopName') {
+    } else if (type === 'salonName') {
       // Validate regex first
-      const shopNameRegex = /^[a-zA-Z0-9_가-힣]+$/;
-      if (!shopNameRegex.test(value)) {
+      const salonNameRegex = /^[a-zA-Z0-9_가-힣]+$/;
+      if (!salonNameRegex.test(value)) {
         return new Response(
           JSON.stringify({
             available: false,
@@ -62,11 +79,16 @@ serve(async (req) => {
         );
       }
 
-      const { data } = await supabaseAdmin
+      const { data, error } = await supabaseAdmin
         .from('salons')
         .select('id')
         .eq('name', value)
         .maybeSingle();
+
+      if (error) {
+        console.error('Database Error (SalonName):', error);
+        throw error;
+      }
 
       if (data) {
         return new Response(
@@ -81,7 +103,7 @@ serve(async (req) => {
         );
       }
     } else {
-      throw new Error('Invalid type');
+      throw new Error(`Invalid type: ${type}`);
     }
 
     return new Response(
@@ -92,6 +114,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
+    console.error('Edge Function Error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

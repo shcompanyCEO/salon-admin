@@ -9,6 +9,9 @@ interface AuthState {
   login: (user: User, token: string) => void;
   logout: () => void;
   updateUser: (user: Partial<User>) => void;
+  // ★ staff cache ★
+  staffCache: Staff[] | null;
+  setStaffCache: (staff: Staff[]) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -17,6 +20,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      staffCache: null,
 
       login: (user, token) => {
         set({
@@ -46,6 +50,8 @@ export const useAuthStore = create<AuthState>()(
           user: state.user ? { ...state.user, ...userData } : null,
         }));
       },
+      // set staff cache
+      setStaffCache: (staff) => set({ staffCache: staff }),
     }),
     {
       name: 'auth-storage',
