@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Menu, Bell, Globe, LogOut } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';

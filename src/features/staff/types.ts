@@ -24,5 +24,6 @@ export interface Staff {
   createdAt: Date;
   updatedAt: Date;
   phone?: string;
+  email?: string;
   role?: UserRole;
 }

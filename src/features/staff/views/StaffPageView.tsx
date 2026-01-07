@@ -23,13 +23,17 @@ export default function StaffPageView() {
     enabled: !!user?.salonId,
   });
 
+  const isAdmin = user?.role === 'SUPER_ADMIN' || user?.role === 'ADMIN';
+
+  const canEdit = (targetMember: Staff) => {
+    if (isAdmin) return true;
+    return targetMember.userId === user?.id; // Can edit self
+  };
+
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
 
   const staffMembers = response?.data || [];
-  const filteredStaff = staffMembers.filter(
-    (member: Staff) => member.salonId === user?.salonId
-  );
 
   const handleUpdateStaff = async (
     staffId: string,
@@ -58,8 +62,6 @@ export default function StaffPageView() {
 
   const getRoleName = (role?: string) => {
     switch (role) {
-      case 'SUPER_ADMIN':
-        return '대표원장';
       case 'ADMIN':
         return '관리자';
       case 'MANAGER':
@@ -113,7 +115,11 @@ export default function StaffPageView() {
               </p>
             </div>
           </div>
-          {/* <Button variant="outline" onClick={() => setShowInviteModal(true)}> ... </Button> */}
+          {isAdmin && (
+            <Button variant="outline" onClick={() => setShowInviteModal(true)}>
+              직원 초대하기
+            </Button>
+          )}
         </div>
 
         {/* Staff Table */}
@@ -124,13 +130,14 @@ export default function StaffPageView() {
                 {[
                   '번호',
                   '이름/닉네임',
+                  '이메일',
                   '연락처',
                   '입사일',
                   '입사/퇴사',
                   '관리 권한',
                   '프로필',
                   '직급/호칭',
-                  '공비서 앱 예약 받기',
+                  '예약 허용',
                 ].map((header) => (
                   <th
                     key={header}
@@ -142,7 +149,7 @@ export default function StaffPageView() {
               </tr>
             </thead>
             <tbody className="divide-y divide-secondary-200">
-              {filteredStaff.map((member: Staff, index: number) => (
+              {staffMembers.map((member: Staff, index: number) => (
                 <tr key={member.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-center text-sm text-secondary-900">
                     {index + 1}
@@ -160,13 +167,16 @@ export default function StaffPageView() {
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center text-sm text-secondary-600">
+                    {member.email || '-'}
+                  </td>
+                  <td className="px-6 py-4 text-center text-sm text-secondary-600">
                     {formatPhone(member.phone)}
                   </td>
                   <td className="px-6 py-4 text-center text-sm text-secondary-600">
                     {formatDate(member.createdAt)}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {member.role !== 'SUPER_ADMIN' ? (
+                    {isAdmin && member.role !== 'SUPER_ADMIN' ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -191,7 +201,7 @@ export default function StaffPageView() {
                       >
                         모든 권한
                       </Badge>
-                    ) : (
+                    ) : isAdmin ? (
                       <Button
                         variant="outline"
                         size="sm"
@@ -202,6 +212,8 @@ export default function StaffPageView() {
                       >
                         권한 설정
                       </Button>
+                    ) : (
+                      <span className="text-secondary-400 text-xs">-</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-center flex justify-center">
@@ -238,9 +250,14 @@ export default function StaffPageView() {
                         type="checkbox"
                         className="sr-only peer"
                         checked={member.isActive}
-                        onChange={() => {}}
+                        disabled={!canEdit(member)}
+                        onChange={(e) => {
+                          handleUpdateStaff(member.id, {
+                            isActive: e.target.checked,
+                          });
+                        }}
                       />
-                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                      <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500 peer-disabled:opacity-50 peer-disabled:cursor-not-allowed"></div>
                       <span className="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300"></span>
                     </label>
                   </td>

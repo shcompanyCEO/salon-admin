@@ -34,7 +34,64 @@
 
   body {
     @apply bg-white text-secondary-900;
-    font-feature-settings: "ss03", "cv02", "cv11";
+    font-feature-settings: 'ss03', 'cv02', 'cv11';
+  }
+}
+
+@layer components {
+  /* Design System Typography */
+  .text-h1 {
+    @apply text-2xl font-bold bg-white text-gray-900;
+  }
+
+  .text-sidebar-industry {
+    /* Industry Header in Sidebar */
+    @apply text-sm font-bold text-gray-500 uppercase tracking-wider;
+  }
+
+  .text-sidebar-category {
+    /* Category Item in Sidebar */
+    @apply text-sm font-medium text-gray-700;
+  }
+
+  .text-section-header {
+    /* Industry Header in Main View */
+    @apply text-sm font-bold text-gray-500 uppercase tracking-wider;
+  }
+
+  .text-h2 {
+    /* Industry Title / Page Section Headers */
+    @apply text-xl font-bold text-gray-800;
+  }
+
+  .text-h3 {
+    /* Category Title */
+    @apply text-2xl font-bold text-gray-900 leading-tight;
+  }
+
+  .text-h4 {
+    /* Service Name */
+    @apply text-[15px] font-semibold text-gray-900;
+  }
+
+  .text-body {
+    /* Standard body text */
+    @apply text-sm text-gray-600;
+  }
+
+  .text-price {
+    /* Price display */
+    @apply text-[15px] font-bold text-gray-900;
+  }
+
+  .text-caption {
+    /* Meta info, small counters */
+    @apply text-xs text-gray-500;
+  }
+
+  /* Button Overrides/Defaults (example of global component sizing if needed) */
+  .btn-primary {
+    @apply bg-primary-500 hover:bg-primary-600 text-white rounded-lg transition-colors px-4 py-2 font-medium;
   }
 }
 

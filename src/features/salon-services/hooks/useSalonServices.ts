@@ -28,7 +28,19 @@ export const useIndustries = (salonId: string) => {
     },
   });
 
-  return { ...query, toggleIndustry: toggleMutation.mutateAsync };
+  const reorderMutation = useMutation({
+    mutationFn: (orderedIndustryIds: string[]) =>
+      salonServicesApi.reorderIndustries(salonId, orderedIndustryIds),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['industries', salonId] });
+    },
+  });
+
+  return {
+    ...query,
+    toggleIndustry: toggleMutation.mutateAsync,
+    reorderIndustries: reorderMutation.mutateAsync,
+  };
 };
 
 export const useCategories = (salonId: string) => {
@@ -44,10 +56,13 @@ export const useCategories = (salonId: string) => {
     mutationFn: ({
       name,
       displayOrder,
+      industryId,
     }: {
       name: string;
       displayOrder: number;
-    }) => salonServicesApi.createCategory(salonId, name, displayOrder),
+      industryId?: string;
+    }) =>
+      salonServicesApi.createCategory(salonId, name, displayOrder, industryId),
     onSuccess: () =>
       queryClient.invalidateQueries({ queryKey: ['categories', salonId] }),
   });
@@ -62,24 +77,43 @@ export const useCategories = (salonId: string) => {
     ...query,
     createCategory: createMutation.mutateAsync,
     deleteCategory: deleteMutation.mutateAsync,
+    updateCategory: useMutation({
+      mutationFn: ({ id, name }: { id: string; name: string }) =>
+        salonServicesApi.updateCategory(salonId, id, { name }),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ['categories', salonId] }),
+    }).mutateAsync,
+    reorderCategories: useMutation({
+      mutationFn: (categories: { id: string; display_order: number }[]) =>
+        salonServicesApi.updateCategoryOrder(salonId, categories),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ['categories', salonId] }),
+    }).mutateAsync,
   };
 };
 
-export const useServices = (salonId: string, categoryId: string) => {
+export const useServices = (
+  salonId: string,
+  categoryId?: string,
+  options?: { enabled?: boolean }
+) => {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ['services', salonId, categoryId],
+    queryKey: ['services', salonId, categoryId || 'all'],
     queryFn: () => salonServicesApi.getServices(salonId, categoryId),
-    enabled: !!salonId && !!categoryId,
+    enabled: options?.enabled !== undefined ? options.enabled : !!salonId,
   });
 
   const createMutation = useMutation({
-    mutationFn: (serviceData: any) =>
-      salonServicesApi.createService(salonId, categoryId, serviceData),
+    mutationFn: (serviceData: any) => {
+      if (!categoryId) throw new Error('Category ID is required');
+      return salonServicesApi.createService(salonId, categoryId, serviceData);
+    },
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey: ['services', salonId, categoryId],
+        // Invalidate both specific category and all services to update counts
+        queryKey: ['services', salonId],
       }),
   });
 
@@ -87,7 +121,7 @@ export const useServices = (salonId: string, categoryId: string) => {
     mutationFn: (id: string) => salonServicesApi.deleteService(salonId, id),
     onSuccess: () =>
       queryClient.invalidateQueries({
-        queryKey: ['services', salonId, categoryId],
+        queryKey: ['services', salonId],
       }),
   });
 
@@ -95,5 +129,22 @@ export const useServices = (salonId: string, categoryId: string) => {
     ...query,
     createService: createMutation.mutateAsync,
     deleteService: deleteMutation.mutateAsync,
+    updateService: useMutation({
+      mutationFn: ({
+        id,
+        updates,
+      }: {
+        id: string;
+        updates: { name?: string; price?: number; duration?: number };
+      }) => salonServicesApi.updateService(salonId, id, updates),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ['services', salonId] }),
+    }).mutateAsync,
+    reorderServices: useMutation({
+      mutationFn: (services: { id: string; display_order: number }[]) =>
+        salonServicesApi.reorderServices(salonId, services),
+      onSuccess: () =>
+        queryClient.invalidateQueries({ queryKey: ['services', salonId] }),
+    }).mutateAsync,
   };
 };

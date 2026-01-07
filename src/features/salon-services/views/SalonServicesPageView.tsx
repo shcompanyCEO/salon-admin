@@ -3,19 +3,25 @@
 import React from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { Layout } from '@/components/layout/Layout';
-import { Check, Info } from 'lucide-react';
+import { Check, Info, ArrowUp, ArrowDown } from 'lucide-react';
 import { useIndustries } from '../hooks/useSalonServices';
 import ServiceList from './components/ServiceList';
+import ServicesSidebar from './components/ServicesSidebar';
+import IndustrySelectionModal from './components/IndustrySelectionModal';
+import { Button } from '@/components/ui/Button';
+import { Settings, Plus } from 'lucide-react';
+import { useState } from 'react';
 
 export default function SalonServicesPageView() {
   const { user } = useAuthStore();
 
-  const { data, isLoading, toggleIndustry } = useIndustries(
+  const { data, isLoading, toggleIndustry, reorderIndustries } = useIndustries(
     user?.salonId || ''
   );
 
   const industries = data?.all || [];
-  const selectedIndustryIds = data?.selected || [];
+  const selectedIndustries = data?.selected || [];
+  const selectedIndustryIds = selectedIndustries.map((i) => i.id);
 
   const handleToggleIndustry = async (industryId: string) => {
     try {
@@ -33,6 +39,44 @@ export default function SalonServicesPageView() {
     }
   };
 
+  const handleReorderIndustries = async (
+    direction: 'up' | 'down',
+    index: number
+  ) => {
+    if (!selectedIndustries.length) return;
+
+    const newIndustries = [...selectedIndustries];
+    // Swap
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newIndustries.length) return;
+
+    [newIndustries[index], newIndustries[targetIndex]] = [
+      newIndustries[targetIndex],
+      newIndustries[index],
+    ];
+
+    // Extract IDs in new order
+    const orderedIds = newIndustries.map((i) => i.id);
+
+    try {
+      await reorderIndustries(orderedIds);
+    } catch (e) {
+      console.error(e);
+      alert('순서 변경 실패');
+    }
+  };
+
+  const [selectedTab, setSelectedTab] = useState<string>('all');
+  const [showReorderSettings, setShowReorderSettings] = useState(false);
+  const [showIndustryModal, setShowIndustryModal] = useState(false);
+
+  // Calculate service counts (mock for now, or derive from ServiceList if possible)
+  // Since we don't have all services here easily without fetching, we might pass a callback or refactor context.
+  // For this step, I'll pass empty object or generic. ServiceList fetches services.
+  // Ideally, valid counts need `allServices`.
+  // Let's rely on ServiceList to be the data provider or lift state up later if needed.
+  // For now, Sidebar expects counts. I'll pass empty and fix in next step or ignoring for basic layout.
+
   if (isLoading) {
     return (
       <Layout>
@@ -44,77 +88,145 @@ export default function SalonServicesPageView() {
   return (
     <Layout>
       <div className="p-8 max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">서비스 관리</h1>
-          <p className="text-gray-500">
-            우리 매장의 업종과 시술 메뉴를 관리하세요.
-          </p>
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="text-2xl font-bold text-gray-900">시술메뉴</h1>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setShowReorderSettings(!showReorderSettings)}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            순서 설정
+          </Button>
         </div>
 
-        {/* Industry Configuration Section */}
-        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-              매장 업종 설정
-              <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                다중 선택 가능
-              </span>
-            </h2>
-          </div>
+        {/* Industry Tabs */}
+        <div className="flex items-center gap-2 mb-8">
+          <button
+            onClick={() => setSelectedTab('all')}
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedTab === 'all'
+                ? 'bg-blue-500 text-white'
+                : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
+            }`}
+          >
+            전체
+          </button>
+          {selectedIndustries.map((ind) => (
+            <button
+              key={ind.id}
+              onClick={() => setSelectedTab(ind.id)}
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                selectedTab === ind.id
+                  ? 'bg-blue-500 text-white'
+                  : 'bg-white text-gray-500 border border-gray-200 hover:bg-gray-50'
+              }`}
+            >
+              {ind.name}
+            </button>
+          ))}
+          <button
+            onClick={() => setShowIndustryModal(true)}
+            className="px-4 py-2 rounded-full text-sm font-medium bg-white text-gray-500 border border-gray-200 hover:bg-gray-50 flex items-center gap-1"
+          >
+            <Plus className="w-3 h-3" />
+            업종 추가
+          </button>
+        </div>
 
-          <div className="bg-blue-50 text-blue-800 text-sm p-4 rounded-md mb-6 flex items-start gap-2">
-            <Info className="w-5 h-5 flex-shrink-0 mt-0.5" />
-            <p>
-              새로운 업종을 추가하면, 해당 업종에 필요한{' '}
-              <strong>기본 직급(예: 디자이너, 아티스트 등)</strong>이 자동으로
-              생성됩니다.
-              <br />
-              이미 직급이 존재하는 경우 중복해서 생성되지 않습니다.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-            {industries.map((industry) => {
-              const isSelected = selectedIndustryIds.includes(industry.id);
-              return (
-                <button
+        {/* Selected Industries Reordering (Visible when Settings clicked) */}
+        {showReorderSettings && selectedIndustries.length > 0 && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4">
+              업종 노출 순서 설정
+            </h3>
+            <div className="flex flex-col gap-2 max-w-lg">
+              {selectedIndustries.map((industry, index) => (
+                <div
                   key={industry.id}
-                  onClick={() => handleToggleIndustry(industry.id)}
-                  className={`
-                  relative flex items-center justify-center p-4 rounded-xl border-2 transition-all duration-200
-                  ${
-                    isSelected
-                      ? 'border-primary-500 bg-primary-50 text-primary-700 shadow-sm'
-                      : 'border-gray-100 bg-white text-gray-600 hover:border-gray-200 hover:bg-gray-50'
-                  }
-                `}
+                  className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100"
                 >
-                  <div className="flex flex-col items-center gap-2">
-                    <span className="font-semibold text-base">
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center justify-center w-6 h-6 rounded-full bg-white text-xs font-bold text-gray-500 border border-gray-200">
+                      {index + 1}
+                    </span>
+                    <span className="font-medium text-gray-700">
                       {industry.name}
                     </span>
-                    {isSelected && (
-                      <div className="absolute top-2 right-2 text-primary-600">
-                        <Check className="w-4 h-4" />
-                      </div>
-                    )}
                   </div>
-                </button>
-              );
-            })}
-          </div>
-        </section>
-
-        {/* Services List Section */}
-        <section className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          {user?.salonId ? (
-            <ServiceList salonId={user.salonId} />
-          ) : (
-            <div className="text-center py-4">
-              살롱 정보를 불러오는 중입니다...
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleReorderIndustries('up', index)}
+                      disabled={index === 0}
+                      className="p-1.5 rounded-md hover:bg-white text-gray-600 disabled:opacity-30"
+                    >
+                      <ArrowUp className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleReorderIndustries('down', index)}
+                      disabled={index === selectedIndustries.length - 1}
+                      className="p-1.5 rounded-md hover:bg-white text-gray-600 disabled:opacity-30"
+                    >
+                      <ArrowDown className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
+            <p className="mt-2 text-xs text-gray-500">
+              * 위/아래 버튼을 눌러 메뉴판에 보여질 순서를 변경할 수 있습니다.
+            </p>
+          </div>
+        )}
+
+        <IndustrySelectionModal
+          isOpen={showIndustryModal}
+          onClose={() => setShowIndustryModal(false)}
+          industries={industries}
+          selectedIndustryIds={selectedIndustryIds}
+          onToggleIndustry={handleToggleIndustry}
+        />
+
+        {/* Main Content Area: Sidebar + Service List */}
+        <div className="flex bg-white rounded-lg shadow-sm border border-gray-200 min-h-[600px]">
+          {/* We need access to categories/services here to pass to Sidebar. 
+              Currently ServiceList handles fetching.
+              I will modify ServiceList to be a controlled component or lift state.
+              For now, I will render ServiceList which acts as the main container and let IT render the Sidebar?
+              No, Sidebar is sibling. 
+              
+              Refactoring Strategy: 
+              - SalonServicesPageView should likely fetch the data to pass to both.
+              - OR, ServiceList can remain smart and I won't fully implement Sidebar props in this step without refactoring data fetching up.
+              
+              Wait, the design is complex. 
+              Let's pass the basic props to ServiceList and let ServiceList handle the layout internally?
+              No, the plan said "Components: ServicesSidebar".
+              
+              I will pass the 'selectedTab' to ServiceList.
+              ServiceList will render the Two-Column layout internally if it fetches the data.
+              
+              Actually, re-reading the plan: 
+              "Layout: Create a Flex container for Sidebar (Left) and Content (Right)." in [SalonServicesPageView].
+              
+              So I need to fetch categories in SalonServicesPageView? 
+              Currently `useCategories` is in ServiceList. 
+              
+              I will change ServiceList to accept `selectedTab` and let it render the TWO columns.
+              This avoids rewriting all data fetching logic right now.
+          */}
+
+          {user?.salonId ? (
+            <ServiceList
+              salonId={user.salonId}
+              orderedIndustries={selectedIndustries}
+              selectedTab={selectedTab}
+            />
+          ) : (
+            <div className="p-8">살롱 정보 없음</div>
           )}
-        </section>
+        </div>
       </div>
     </Layout>
   );

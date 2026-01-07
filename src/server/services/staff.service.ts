@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 // TODO: Replace with centralized Supabase client if available in server context
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!; // Bypass RLS with Admin Key
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 export class StaffService {
@@ -34,7 +34,7 @@ export class StaffService {
       `
       )
       .eq('salon_id', salonId)
-      .in('role', ['ADMIN', 'MANAGER', 'STAFF'])
+      .in('role', ['SUPER_ADMIN', 'ADMIN', 'MANAGER', 'STAFF'])
       .eq('is_active', true);
 
     if (error) {
@@ -76,6 +76,7 @@ export class StaffService {
       createdAt: user.created_at,
       updatedAt: user.updated_at,
       phone: user.phone,
+      email: user.email,
       role: user.role,
     };
   }

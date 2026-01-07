@@ -87,6 +87,7 @@ export interface Staff {
   updatedAt: Date;
   // Extended fields from User
   phone?: string;
+  email?: string;
   role?: UserRole;
 }
 
