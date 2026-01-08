@@ -283,16 +283,30 @@ export class SalonServicesService {
     salonId: string,
     categories: { id: string; display_order: number }[]
   ) {
-    const { error } = await client.from('service_categories').upsert(
-      categories.map((cat) => ({
-        id: cat.id,
-        display_order: cat.display_order,
-        salon_id: salonId,
-        updated_at: new Date().toISOString(),
-      })),
-      { onConflict: 'id' }
+    const updates = categories.map((cat) =>
+      client
+        .from('service_categories')
+        .update({ display_order: cat.display_order })
+        .eq('id', cat.id)
+        .eq('salon_id', salonId)
     );
 
-    if (error) throw new Error(error.message);
+    await Promise.all(updates);
+  }
+
+  static async reorderServices(
+    client: SupabaseClient,
+    salonId: string,
+    services: { id: string; display_order: number }[]
+  ) {
+    const updates = services.map((service) =>
+      client
+        .from('services')
+        .update({ display_order: service.display_order })
+        .eq('id', service.id)
+        .eq('salon_id', salonId)
+    );
+
+    await Promise.all(updates);
   }
 }

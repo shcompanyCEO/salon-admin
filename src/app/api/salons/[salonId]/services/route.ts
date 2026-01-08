@@ -148,6 +148,13 @@ export async function POST(
           data.updates
         );
         break;
+      case 'reorder_services':
+        await SalonServicesService.reorderServices(
+          supabase,
+          salonId,
+          data.services
+        );
+        break;
       default:
         return NextResponse.json(
           { success: false, message: 'Invalid action' },

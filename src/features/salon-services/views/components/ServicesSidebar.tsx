@@ -155,8 +155,6 @@ export default function ServicesSidebar({
             .filter((c) => c.industry_id === industry.id)
             .sort((a, b) => a.display_order - b.display_order);
 
-          if (industryCategories.length === 0) return null;
-
           return (
             <div key={industry.id} className="space-y-2">
               <div className="text-sidebar-industry px-2 mb-2">

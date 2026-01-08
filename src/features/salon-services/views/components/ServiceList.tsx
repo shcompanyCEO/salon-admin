@@ -45,12 +45,14 @@ export default function ServiceList({
   selectedTab,
 }: ServiceListProps) {
   const {
-    data: categories = [],
+    data: categoriesData,
     isLoading,
     createCategory,
     deleteCategory,
     reorderCategories,
   } = useCategories(salonId);
+
+  const categories = categoriesData || [];
 
   const [isCreating, setIsCreating] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
@@ -93,6 +95,7 @@ export default function ServiceList({
   const [editServiceData, setEditServiceData] = useState({
     name: '',
     price: '',
+    duration: '30',
   });
 
   const handleStartEditCategory = (category: any) => {
@@ -116,6 +119,7 @@ export default function ServiceList({
     setEditServiceData({
       name: service.name,
       price: service.base_price?.toString() || '0',
+      duration: service.duration_minutes?.toString() || '30',
     });
   };
 
@@ -127,6 +131,7 @@ export default function ServiceList({
         updates: {
           name: editServiceData.name,
           price: parseInt(editServiceData.price) || 0,
+          duration: parseInt(editServiceData.duration) || 30,
         },
       });
       setEditingServiceId(null);
@@ -444,9 +449,13 @@ function SortableServiceRow({
 }: {
   service: ServiceMenu;
   editingServiceId: string | null;
-  editServiceData: { name: string; price: string };
+  editServiceData: { name: string; price: string; duration: string };
   onEditService: (service: any) => void;
-  onEditServiceDataChange: (data: { name: string; price: string }) => void;
+  onEditServiceDataChange: (data: {
+    name: string;
+    price: string;
+    duration: string;
+  }) => void;
   onSaveService: () => void;
   onCancelEditService: () => void;
   onDeleteService: (id: string) => void;
@@ -478,11 +487,12 @@ function SortableServiceRow({
       }`}
     >
       {currentlyEditing ? (
-        <div className="flex w-full items-center gap-4">
-          <div className="flex-1">
+        <div className="flex w-full items-center justify-between gap-0">
+          {/* Name Input */}
+          <div className="flex-1 pr-4">
             <input
               type="text"
-              className="w-full px-2 py-1 border border-gray-300 rounded text-sm mb-2"
+              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
               placeholder="시술명"
               value={editServiceData.name}
               onChange={(e) =>
@@ -491,11 +501,36 @@ function SortableServiceRow({
                   name: e.target.value,
                 })
               }
+              autoFocus
             />
-            <div className="flex gap-2">
+          </div>
+
+          {/* Duration Input */}
+          <div className="w-24 text-center pr-4">
+            <select
+              className="w-full px-2 py-1.5 border border-gray-300 rounded text-sm"
+              value={editServiceData.duration}
+              onChange={(e) =>
+                onEditServiceDataChange({
+                  ...editServiceData,
+                  duration: e.target.value,
+                })
+              }
+            >
+              <option value="15">15분</option>
+              <option value="30">30분</option>
+              <option value="60">60분</option>
+              <option value="90">90분</option>
+              <option value="120">120분</option>
+            </select>
+          </div>
+
+          {/* Price Input */}
+          <div className="w-32 text-right pr-4">
+            <div className="flex items-center justify-end gap-1">
               <input
                 type="number"
-                className="w-24 px-2 py-1 border border-gray-300 rounded text-sm text-right"
+                className="w-20 px-2 py-1.5 border border-gray-300 rounded text-sm text-right"
                 placeholder="가격"
                 value={editServiceData.price}
                 onChange={(e) =>
@@ -505,9 +540,12 @@ function SortableServiceRow({
                   })
                 }
               />
+              <span className="text-sm">원</span>
             </div>
           </div>
-          <div className="flex gap-1">
+
+          {/* Actions */}
+          <div className="w-16 flex justify-end gap-1">
             <Button size="sm" onClick={onSaveService}>
               저장
             </Button>
@@ -518,31 +556,34 @@ function SortableServiceRow({
         </div>
       ) : (
         <>
-          <div className="flex-1 text-h4">{service.name}</div>
+          {/* Clickable area for editing */}
+          <div
+            className="flex-1 flex items-center cursor-pointer"
+            onClick={() => onEditService(service)}
+          >
+            <div className="flex-1 text-h4">{service.name}</div>
 
-          <div className="w-24 text-center text-body">
-            {service.duration_minutes}분
-          </div>
+            <div className="w-24 text-center text-body">
+              {service.duration_minutes}분
+            </div>
 
-          <div className="w-32 text-right text-price">
-            {service.pricing_type === 'FIXED'
-              ? `${(
-                  service.base_price ||
-                  service.price ||
-                  0
-                ).toLocaleString()}원`
-              : '변동'}
+            <div className="w-32 text-right text-price">
+              {service.pricing_type === 'FIXED'
+                ? `${(
+                    service.base_price ||
+                    service.price ||
+                    0
+                  ).toLocaleString()}원`
+                : '변동'}
+            </div>
           </div>
 
           <div className="w-16 flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
-              onClick={() => onEditService(service)}
-              className="p-1 text-gray-400 hover:text-blue-500"
-            >
-              <Edit2 className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => onDeleteService(service.id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDeleteService(service.id);
+              }}
               className="p-1 text-gray-400 hover:text-red-500"
             >
               <Trash2 className="w-4 h-4" />
@@ -574,14 +615,18 @@ function ServiceItems({
   salonId: string;
   categoryId: string;
   editingServiceId: string | null;
-  editServiceData: { name: string; price: string };
+  editServiceData: { name: string; price: string; duration: string };
   onEditService: (service: any) => void;
-  onEditServiceDataChange: (data: { name: string; price: string }) => void;
+  onEditServiceDataChange: (data: {
+    name: string;
+    price: string;
+    duration: string;
+  }) => void;
   onSaveService: () => void;
   onCancelEditService: () => void;
 }) {
   const {
-    data: servicesData = [],
+    data: servicesData,
     createService,
     deleteService,
     reorderServices,
@@ -709,18 +754,6 @@ function ServiceItems({
             }
             autoFocus
           />
-          <div className="flex items-center gap-1 w-24">
-            <input
-              type="number"
-              className="w-full px-2 py-2 text-sm border rounded-md text-right"
-              placeholder="0"
-              value={newService.price}
-              onChange={(e) =>
-                setNewService({ ...newService, price: e.target.value })
-              }
-            />
-            <span className="text-sm text-gray-500 whitespace-nowrap">원</span>
-          </div>
           <select
             className="w-20 px-2 py-2 text-sm border rounded-md"
             value={newService.duration}
@@ -737,6 +770,18 @@ function ServiceItems({
             <option value={90}>90분</option>
             <option value={120}>120분</option>
           </select>
+          <div className="flex items-center gap-1 w-24">
+            <input
+              type="number"
+              className="w-full px-2 py-2 text-sm border rounded-md text-right"
+              placeholder="0"
+              value={newService.price}
+              onChange={(e) =>
+                setNewService({ ...newService, price: e.target.value })
+              }
+            />
+            <span className="text-sm text-gray-500 whitespace-nowrap">원</span>
+          </div>
           <Button size="sm" onClick={handleAddService}>
             확인
           </Button>
