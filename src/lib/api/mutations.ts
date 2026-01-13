@@ -22,7 +22,7 @@ interface LoginResponse {
   user: User;
   token: string;
 }
-
+//로그인
 export const useLogin = (
   options?: Omit<
     UseMutationOptions<
@@ -34,7 +34,13 @@ export const useLogin = (
   >
 ) => {
   return useMutation({
-    mutationFn: async ({ email, password }: { email: string; password: string }) => {
+    mutationFn: async ({
+      email,
+      password,
+    }: {
+      email: string;
+      password: string;
+    }) => {
       const result = await signInWithEmail(email, password);
 
       if (result.error || !result.user || !result.token) {
@@ -56,8 +62,12 @@ export const useLogin = (
   });
 };
 
+//로그아웃
 export const useLogout = (
-  options?: Omit<UseMutationOptions<ApiResponse<void>, Error, void>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<void>, Error, void>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -89,7 +99,7 @@ export const useLogout = (
     ...options,
   });
 };
-
+//회원가입
 export const useRegister = (
   options?: Omit<UseMutationOptions<ApiResponse<any>, Error, any>, 'mutationFn'>
 ) => {
@@ -99,8 +109,12 @@ export const useRegister = (
   });
 };
 
+//비밀번호 찾기
 export const useForgotPassword = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   return useMutation({
     mutationFn: (email: string) =>
@@ -109,6 +123,7 @@ export const useForgotPassword = (
   });
 };
 
+//비밀번호 재설정
 export const useResetPassword = (
   options?: Omit<
     UseMutationOptions<
@@ -130,6 +145,7 @@ export const useResetPassword = (
 // 살롱 Mutations
 // ============================================
 
+//살롱 생성
 export const useCreateSalon = (
   options?: Omit<UseMutationOptions<ApiResponse<any>, Error, any>, 'mutationFn'>
 ) => {
@@ -144,6 +160,7 @@ export const useCreateSalon = (
   });
 };
 
+//살롱 수정
 export const useUpdateSalon = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { id: string; data: any }>,
@@ -162,8 +179,12 @@ export const useUpdateSalon = (
   });
 };
 
+//살롱 삭제
 export const useDeleteSalon = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -177,7 +198,10 @@ export const useDeleteSalon = (
 };
 
 export const useApproveSalon = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -213,6 +237,7 @@ export const useCreateDesigner = (
   });
 };
 
+//디자이너 수정
 export const useUpdateDesigner = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { id: string; data: any }>,
@@ -231,8 +256,12 @@ export const useUpdateDesigner = (
   });
 };
 
+//디자이너 삭제
 export const useDeleteDesigner = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -249,6 +278,7 @@ export const useDeleteDesigner = (
 // 서비스 Mutations
 // ============================================
 
+//서비스 생성
 export const useCreateService = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { salonId: string; data: any }>,
@@ -268,6 +298,7 @@ export const useCreateService = (
   });
 };
 
+//서비스 수정
 export const useUpdateService = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { id: string; data: any }>,
@@ -286,8 +317,12 @@ export const useUpdateService = (
   });
 };
 
+//서비스 삭제
 export const useDeleteService = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -304,6 +339,7 @@ export const useDeleteService = (
 // 예약 Mutations
 // ============================================
 
+//예약 생성
 export const useCreateBooking = (
   options?: Omit<UseMutationOptions<ApiResponse<any>, Error, any>, 'mutationFn'>
 ) => {
@@ -318,6 +354,7 @@ export const useCreateBooking = (
   });
 };
 
+//예약 수정
 export const useUpdateBooking = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { id: string; data: any }>,
@@ -336,8 +373,12 @@ export const useUpdateBooking = (
   });
 };
 
+//예약 취소
 export const useCancelBooking = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -350,8 +391,12 @@ export const useCancelBooking = (
   });
 };
 
+//예약 완료
 export const useCompleteBooking = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -368,6 +413,7 @@ export const useCompleteBooking = (
 // 고객 Mutations
 // ============================================
 
+//고객 생성
 export const useCreateCustomer = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { salonId: string; data: any }>,
@@ -386,6 +432,7 @@ export const useCreateCustomer = (
   });
 };
 
+//고객 수정
 export const useUpdateCustomer = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { id: string; data: any }>,
@@ -404,8 +451,12 @@ export const useUpdateCustomer = (
   });
 };
 
+//고객 삭제
 export const useDeleteCustomer = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -422,9 +473,14 @@ export const useDeleteCustomer = (
 // 리뷰 Mutations
 // ============================================
 
+//리뷰 답변
 export const useRespondToReview = (
   options?: Omit<
-    UseMutationOptions<ApiResponse<any>, Error, { id: string; comment: string }>,
+    UseMutationOptions<
+      ApiResponse<any>,
+      Error,
+      { id: string; comment: string }
+    >,
     'mutationFn'
   >
 ) => {
@@ -444,6 +500,7 @@ export const useRespondToReview = (
 // 채팅 Mutations
 // ============================================
 
+//채팅 메시지 보내기
 export const useSendMessage = (
   options?: Omit<
     UseMutationOptions<ApiResponse<any>, Error, { roomId: string; data: any }>,
@@ -462,8 +519,12 @@ export const useSendMessage = (
   });
 };
 
+//채팅 읽음 표시
 export const useMarkChatAsRead = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, string>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, string>,
+    'mutationFn'
+  >
 ) => {
   const queryClient = useQueryClient();
 
@@ -481,8 +542,12 @@ export const useMarkChatAsRead = (
 // 파일 업로드 Mutations
 // ============================================
 
+//이미지 업로드
 export const useUploadImage = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, File>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, File>,
+    'mutationFn'
+  >
 ) => {
   return useMutation({
     mutationFn: (file: File) => {
@@ -494,8 +559,12 @@ export const useUploadImage = (
   });
 };
 
+//이미지 여러장 업로드
 export const useUploadImages = (
-  options?: Omit<UseMutationOptions<ApiResponse<any>, Error, File[]>, 'mutationFn'>
+  options?: Omit<
+    UseMutationOptions<ApiResponse<any>, Error, File[]>,
+    'mutationFn'
+  >
 ) => {
   return useMutation({
     mutationFn: (files: File[]) => {

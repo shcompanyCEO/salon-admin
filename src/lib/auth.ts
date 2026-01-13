@@ -78,6 +78,7 @@ export async function signInWithEmail(
 
     // salon_id 확인 및 검증
     let salonId = userData.salon_id;
+    let permissions: any[] = []; // StaffPermission[] but import might be circular or messy, using any[] and casting for now or strict type if possible
 
     if (salonId) {
       const { data: salonData, error: salonError } = await supabase
@@ -97,6 +98,27 @@ export async function signInWithEmail(
             role
           );
         }
+
+        // 직원 권한 조회 (staff_profiles 테이블)
+        if (role === 'MANAGER' || role === 'STAFF' || role === 'ADMIN') {
+          const { data: profileData } = await supabase
+            .from('staff_profiles')
+            .select('permissions')
+            .eq('user_id', userData.id)
+            .single();
+
+          if (profileData && profileData.permissions) {
+            // Transform JSON permissions to Array format
+            permissions = Object.entries(profileData.permissions || {}).map(
+              ([key, val]: [string, any]) => ({
+                module: key,
+                canRead: val.view || false,
+                canWrite: val.edit || val.create || false,
+                canDelete: val.delete || false,
+              })
+            );
+          }
+        }
       }
     }
 
@@ -113,6 +135,7 @@ export async function signInWithEmail(
       createdAt: new Date(userData.created_at),
       updatedAt: new Date(userData.updated_at),
       isActive: userData.is_active ?? true,
+      permissions: permissions,
     };
 
     return {
@@ -193,6 +216,7 @@ export async function signUpWithEmail(
       createdAt: new Date(authData.user.created_at),
       updatedAt: new Date(authData.user.created_at),
       isActive: true,
+      // SignUp usually doesn't have permissions immediately unless auto-assigned
     };
 
     return {
@@ -330,6 +354,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     // salon_id 확인 및 검증
     let salonId = userData.salon_id;
+    let permissions: any[] = [];
 
     if (salonId) {
       const { data: salonData, error: salonError } = await supabase
@@ -349,8 +374,27 @@ export async function getCurrentUser(): Promise<User | null> {
             'User has salon_id but invalid role for salon access:',
             role
           );
-          // 로직에 따라 salonId를 제거하거나 에러를 반환할 수 있음.
-          // 여기서는 경고만 하고 진행
+        }
+
+        // 직원 권한 조회 (staff_profiles 테이블)
+        if (role === 'MANAGER' || role === 'STAFF' || role === 'ADMIN') {
+          const { data: profileData } = await supabase
+            .from('staff_profiles')
+            .select('permissions')
+            .eq('user_id', userData.id)
+            .single();
+
+          if (profileData && profileData.permissions) {
+            // Transform JSON permissions to Array format
+            permissions = Object.entries(profileData.permissions || {}).map(
+              ([key, val]: [string, any]) => ({
+                module: key,
+                canRead: val.view || false,
+                canWrite: val.edit || val.create || false,
+                canDelete: val.delete || false,
+              })
+            );
+          }
         }
       }
     }
@@ -367,6 +411,7 @@ export async function getCurrentUser(): Promise<User | null> {
       createdAt: new Date(userData.created_at),
       updatedAt: new Date(userData.updated_at),
       isActive: userData.is_active ?? true,
+      permissions: permissions,
     };
 
     return user;

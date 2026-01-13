@@ -48,6 +48,54 @@ export class StaffService {
     return users.map(this.transformToStaff);
   }
 
+  static async updateStaff(salonId: string, staffId: string, updates: any) {
+    const profileUpdates: any = {};
+
+    // Handle permissions update
+    if (updates.permissions) {
+      // Convert Array back to Object (if it comes as array)
+      if (Array.isArray(updates.permissions)) {
+        const permsObject: Record<string, any> = {};
+        updates.permissions.forEach((p: any) => {
+          permsObject[p.module] = {
+            view: p.canRead,
+            create: p.canWrite,
+            edit: p.canWrite,
+            delete: p.canDelete,
+          };
+        });
+        profileUpdates.permissions = permsObject;
+      } else {
+        profileUpdates.permissions = updates.permissions;
+      }
+    }
+
+    // Handle other updates if needed (e.g. isActive)
+    if (typeof updates.isActive !== 'undefined') {
+      // Users table update needed for isActive
+      const { error: userError } = await supabase
+        .from('users')
+        .update({ is_active: updates.isActive })
+        .eq('id', staffId);
+
+      if (userError) throw userError;
+    }
+
+    // Update staff_profiles if permissions or other profile fields
+    if (Object.keys(profileUpdates).length > 0) {
+      const { error: profileError } = await supabase
+        .from('staff_profiles')
+        .upsert(
+          { user_id: staffId, ...profileUpdates },
+          { onConflict: 'user_id' }
+        );
+
+      if (profileError) throw profileError;
+    }
+
+    return { success: true };
+  }
+
   private static transformToStaff(user: any) {
     const profile = user.staff_profiles?.[0] || user.staff_profiles || {};
 

@@ -3,7 +3,7 @@ import { BookingService } from '@/server/services/bookings.service';
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { salonId: string } }
+  { params }: { params: Promise<{ salonId: string }> }
 ) {
   try {
     const { salonId } = await params;
@@ -24,7 +24,7 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { salonId: string } }
+  { params }: { params: Promise<{ salonId: string }> }
 ) {
   try {
     const { salonId } = await params;

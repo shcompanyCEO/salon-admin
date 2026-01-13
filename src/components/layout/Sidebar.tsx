@@ -52,6 +52,7 @@ export const Sidebar: React.FC = () => {
     roles: UserRole[];
     subItems?: MenuItem[];
     id?: string;
+    permissionKey?: string;
   }
 
   const menuItems: MenuItem[] = [
@@ -60,48 +61,55 @@ export const Sidebar: React.FC = () => {
       icon: LayoutDashboard,
       href: '/dashboard',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+      permissionKey: 'dashboard',
     },
     {
       name: t('nav.bookings'),
       icon: Calendar,
       href: '/bookings',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+      permissionKey: 'bookings',
     },
     {
       name: t('nav.customers'),
       icon: Users,
       href: '/customers',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+      permissionKey: 'customers',
     },
     {
       id: 'salon-management',
       name: t('nav.salons'),
       icon: Building2,
-      roles: [UserRole.MANAGER, UserRole.ADMIN],
+      roles: [UserRole.MANAGER, UserRole.ADMIN, UserRole.STAFF],
       subItems: [
         {
           name: t('nav.staff'),
           icon: Briefcase,
           href: '/staff',
           roles: [UserRole.MANAGER, UserRole.ADMIN, UserRole.STAFF],
+          permissionKey: 'staff',
         },
         {
           name: t('nav.services'),
           icon: ShoppingBag,
           href: '/services',
-          roles: [UserRole.MANAGER, UserRole.ADMIN],
+          roles: [UserRole.MANAGER, UserRole.ADMIN, UserRole.STAFF],
+          permissionKey: 'services',
         },
         {
           name: t('nav.reviews'),
           icon: Star,
           href: '/reviews',
           roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+          permissionKey: 'reviews',
         },
         {
           name: t('nav.sales'),
           icon: TrendingUp,
           href: '/sales',
           roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+          permissionKey: 'sales',
         },
       ],
     },
@@ -110,18 +118,64 @@ export const Sidebar: React.FC = () => {
       icon: MessageSquare,
       href: '/chat',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+      permissionKey: 'chat',
     },
     {
       name: t('nav.settings'),
       icon: Settings,
       href: '/settings',
       roles: [UserRole.MANAGER, UserRole.STAFF, UserRole.ADMIN],
+      permissionKey: 'settings',
     },
   ];
 
-  const filteredMenuItems = menuItems.filter((item) =>
-    user?.role ? item.roles.includes(user.role) : false
-  );
+  const checkPermission = (item: MenuItem): boolean => {
+    // 1. Role Check
+    if (user?.role && !item.roles.includes(user.role)) {
+      return false;
+    }
+
+    // 2. Super Admin & Admin Bypass
+    if (user?.role === UserRole.SUPER_ADMIN || user?.role === UserRole.ADMIN) {
+      return true;
+    }
+
+    // 3. Permission Key Check
+    if (item.permissionKey) {
+      if (!user?.permissions) return false; // No permissions array = no access to guarded items
+      const perm = user.permissions.find(
+        (p) => p.module === item.permissionKey
+      );
+      // Default to false if permission record not found
+      return perm?.canRead ?? false;
+    }
+
+    return true;
+  };
+
+  const filterMenuItems = (items: MenuItem[]): MenuItem[] => {
+    return items
+      .map((item) => {
+        // If it has subitems, filter them first
+        if (item.subItems) {
+          const visibleSubItems = filterMenuItems(item.subItems);
+          // Check if parent itself has role access (ignoring permissionKey for group parent for now, assuming it depends on children)
+          // But we should still check roles for the parent.
+          if (user?.role && !item.roles.includes(user.role)) return null;
+
+          if (visibleSubItems.length > 0) {
+            return { ...item, subItems: visibleSubItems };
+          }
+          return null; // Hide parent if no children visible
+        }
+
+        // Single item
+        return checkPermission(item) ? item : null;
+      })
+      .filter((item): item is MenuItem => item !== null);
+  };
+
+  const filteredMenuItems = filterMenuItems(menuItems);
 
   return (
     <>

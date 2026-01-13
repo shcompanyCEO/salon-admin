@@ -38,6 +38,7 @@ export const en = {
     users: 'Users',
     employee: 'Employees',
     salons: 'Salons',
+    staff: 'Staff',
   },
 
   booking: {

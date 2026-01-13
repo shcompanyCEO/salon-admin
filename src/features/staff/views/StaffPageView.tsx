@@ -194,7 +194,8 @@ export default function StaffPageView() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    {member.role === 'SUPER_ADMIN' ? (
+                    {member.role === 'SUPER_ADMIN' ||
+                    member.role === 'ADMIN' ? (
                       <Badge
                         variant="default"
                         className="bg-gray-100 text-gray-500 font-normal"

@@ -12,10 +12,15 @@ interface StaffPermissionModalProps {
 }
 
 const MODULES = [
+  { key: 'dashboard', label: '대시보드' },
   { key: 'bookings', label: '예약 관리' },
   { key: 'customers', label: '고객 관리' },
+  { key: 'staff', label: '직원 관리' },
+  { key: 'services', label: '서비스 관리' },
   { key: 'reviews', label: '리뷰 관리' },
   { key: 'sales', label: '매출 관리' },
+  { key: 'chat', label: '채팅' },
+  { key: 'settings', label: '설정' },
 ];
 
 export default function StaffPermissionModal({

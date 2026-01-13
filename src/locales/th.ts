@@ -39,6 +39,7 @@ export const th = {
     users: 'ผู้ใช้',
     employee: 'พนักงาน',
     salons: 'ร้านเสริมสวย',
+    staff: 'พนักงาน',
   },
 
   booking: {

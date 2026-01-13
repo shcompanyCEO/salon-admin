@@ -35,6 +35,7 @@ export interface User {
   createdAt: Date;
   updatedAt: Date;
   isActive: boolean;
+  permissions?: StaffPermission[];
 }
 
 // 살롱 인터페이스
