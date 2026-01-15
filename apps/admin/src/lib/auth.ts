@@ -2,7 +2,7 @@
  * Supabase 인증 서비스
  */
 
-import { supabase as _supabase } from './supabase';
+import { supabase as _supabase } from './supabase/client';
 import { User, UserRole } from '@/types';
 
 const supabase = _supabase as any;

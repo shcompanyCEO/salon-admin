@@ -1,7 +1,5 @@
-import React from 'react';
 import { X, Check, Info } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
-import { SalonIndustry } from '../../types';
 
 interface IndustrySelectionModalProps {
   isOpen: boolean;

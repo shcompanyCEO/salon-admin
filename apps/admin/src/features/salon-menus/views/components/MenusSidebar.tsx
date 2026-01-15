@@ -17,7 +17,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { Plus, Menu } from 'lucide-react';
 import { MenuCategory, SalonIndustry } from '../../types';
-import { Button } from '@/components/ui/Button';
 
 interface MenusSidebarProps {
   categories: MenuCategory[];

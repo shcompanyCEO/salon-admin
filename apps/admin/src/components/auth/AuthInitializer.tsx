@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { getCurrentUser } from '@/lib/auth';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/client';
 
 export function AuthInitializer() {
   const { login, logout } = useAuthStore();

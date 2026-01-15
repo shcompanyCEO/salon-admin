@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { createAuthApi } from '../api';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/client';
 import { endpoints } from '@/lib/api/endpoints';
 import { useAuthStore } from '@/store/authStore';
 import { CheckStatus } from '../types';

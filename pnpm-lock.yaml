@@ -164,9 +164,15 @@ importers:
 
   packages/supabase:
     dependencies:
+      clsx:
+        specifier: ^2.0.0
+        version: 2.1.1
       supabase:
         specifier: latest
         version: 2.72.7
+      tailwind-merge:
+        specifier: ^2.0.0
+        version: 2.6.0
     devDependencies:
       typescript:
         specifier: latest

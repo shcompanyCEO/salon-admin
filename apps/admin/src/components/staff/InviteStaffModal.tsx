@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
-import { supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase/client';
 import { inviteStaff } from '@/actions/staff';
 
 interface InviteStaffModalProps {
