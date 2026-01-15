@@ -75,11 +75,13 @@ export const createSalonMenusApi = (client?: SupabaseClient<any>) => {
     getMenus: (
       salonId: string,
       categoryId?: string
-    ): Promise<ApiResponse<SalonMenu[]>> =>
-      apiClient.get(endpoints.salons.menus.path(salonId), {
-        type: 'menus',
-        categoryId,
-      }),
+    ): Promise<ApiResponse<SalonMenu[]>> => {
+      const params: Record<string, string> = { type: 'menus' };
+      if (categoryId) {
+        params.categoryId = categoryId;
+      }
+      return apiClient.get(endpoints.salons.menus.path(salonId), params);
+    },
 
     createMenu: (salonId: string, categoryId: string, menuData: any) =>
       apiClient.post(endpoints.salons.menus.path(salonId), {
