@@ -9,10 +9,15 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@salon-admin/api-core": "workspace:^",
+    "@salon-admin/supabase": "workspace:*",
+    "@supabase/supabase-js": "^2.90.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.344.0",
     "next": "16.1.2",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "@salon-admin/supabase": "workspace:*"
+    "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
