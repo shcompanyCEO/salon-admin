@@ -2,10 +2,20 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { Scissors, Check, X, Loader2, Eye, EyeOff } from 'lucide-react';
+import {
+  Scissors,
+  Check,
+  X,
+  Loader2,
+  Eye,
+  EyeOff,
+  ChevronLeft,
+} from 'lucide-react';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { Select } from '@/components/ui/Select';
 import { CheckStatus } from '../types';
 import { useRegistration } from '../hooks/useAuth';
@@ -34,6 +44,8 @@ interface RegisterForm {
 
 export default function RegisterPageView() {
   const router = useRouter();
+  const t = useTranslations('auth.register');
+  const tInd = useTranslations('auth.industries');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -45,6 +57,14 @@ export default function RegisterPageView() {
   const [verifiedUser, setVerifiedUser] = useState<User | null>(null);
   const [otpLoading, setOtpLoading] = useState(false);
   const [otpTimer, setOtpTimer] = useState(0); // Optional: Timer logic could be added
+
+  const INDUSTRIES = [
+    { label: tInd('HAIR'), value: 'HAIR' },
+    { label: tInd('NAIL'), value: 'NAIL' },
+    { label: tInd('ESTHETIC'), value: 'ESTHETIC' },
+    { label: tInd('MASSAGE'), value: 'MASSAGE' },
+    { label: tInd('BARBERSHOP'), value: 'BARBERSHOP' },
+  ];
 
   const {
     salonNameStatus,
@@ -139,7 +159,7 @@ export default function RegisterPageView() {
       if (error) throw error;
 
       setOtpSent(true);
-      alert('인증번호가 발송되었습니다.');
+      alert(t('success.otpSent'));
     } catch (err: any) {
       console.error(err);
       setError(err.message || '인증번호 발송 실패');
@@ -169,7 +189,7 @@ export default function RegisterPageView() {
 
       setOtpVerified(true);
       setVerifiedUser(data.user);
-      alert('인증이 완료되었습니다.');
+      alert(t('success.otpVerified'));
     } catch (err: any) {
       console.error(err);
       setError(err.message || '인증번호 확인 실패');
@@ -213,7 +233,7 @@ export default function RegisterPageView() {
         industryNames: data.industryNames,
       });
 
-      alert('회원가입이 완료되었습니다!\n로그인 페이지로 이동합니다.');
+      alert(t('success.registerComplete'));
       router.push('/login');
     } catch (err: any) {
       setError(err.message || '오류가 발생했습니다');
@@ -224,9 +244,19 @@ export default function RegisterPageView() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12">
-      <div className="max-w-md w-full">
-        <h1 className="text-2xl font-bold mb-8 text-center">회원가입</h1>
+    <div className="min-h-screen flex items-center justify-center bg-white px-4 py-12 relative">
+      <LanguageSwitcher className="absolute top-4 right-4" />
+      <div className="max-w-md w-full border border-gray-200 rounded-xl p-8 shadow-sm">
+        {/* Header with Back Button */}
+        <div className="relative flex items-center justify-center mb-10">
+          <button
+            onClick={() => router.push('/login')}
+            className="absolute left-0 p-1 -ml-1 text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <ChevronLeft size={24} />
+          </button>
+          <h1 className="text-xl font-bold text-gray-900">{t('title')}</h1>
+        </div>
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-md text-sm">
@@ -238,40 +268,37 @@ export default function RegisterPageView() {
           {/* ID Input */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-900">
-              아이디 <span className="text-red-500">*</span>
+              {t('id')} <span className="text-red-500">*</span>
             </label>
             <Input
-              placeholder="아이디를 입력해 주세요."
+              placeholder={t('placeholders.id')}
               {...register('id', {
-                required: '아이디를 입력해주세요',
+                required: t('errors.required'),
                 pattern: {
                   value: /^[a-z0-9]{4,20}$/,
-                  message:
-                    '영 소문자, 숫자를 사용해 4~20자 이내로 입력해 주세요.',
+                  message: t('helpers.id'),
                 },
               })}
               error={errors.id?.message}
             />
-            <p className="text-xs text-gray-400">
-              영 소문자, 숫자를 사용해 4~20자 이내로 입력해 주세요.
-            </p>
+            <p className="text-xs text-gray-400">{t('helpers.id')}</p>
           </div>
 
           {/* Password */}
           <div className="space-y-4">
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-900">
-                비밀번호 <span className="text-red-500">*</span>
+                {t('password')} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="비밀번호를 입력해 주세요."
+                  placeholder={t('placeholders.password')}
                   {...register('password', {
-                    required: '비밀번호를 입력해주세요',
+                    required: t('errors.required'),
                     minLength: {
                       value: 8,
-                      message: '8자 이상 입력해주세요',
+                      message: t('helpers.password'), // Using helper text as error for simplicity or add specific error key
                     },
                   })}
                   error={errors.password?.message}
@@ -290,12 +317,11 @@ export default function RegisterPageView() {
               <div className="relative">
                 <Input
                   type={showConfirmPassword ? 'text' : 'password'}
-                  placeholder="비밀번호를 한 번 더 입력해 주세요."
+                  placeholder={t('placeholders.confirmPassword')}
                   {...register('confirmPassword', {
-                    required: '비밀번호 확인을 입력해주세요',
+                    required: t('errors.required'),
                     validate: (val) =>
-                      val === watch('password') ||
-                      '비밀번호가 일치하지 않습니다',
+                      val === watch('password') || t('errors.passwordMismatch'),
                   })}
                   error={errors.confirmPassword?.message}
                 />
@@ -311,51 +337,32 @@ export default function RegisterPageView() {
                   )}
                 </button>
               </div>
-              <p className="text-xs text-gray-400">
-                영문+숫자+특수문자로 8~20자 이내로 입력해 주세요.
-              </p>
+              <p className="text-xs text-gray-400">{t('helpers.password')}</p>
             </div>
           </div>
 
           {/* Name */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-900">
-              이름 <span className="text-red-500">*</span>
+              {t('name')} <span className="text-red-500">*</span>
             </label>
             <Input
-              placeholder="이름을 입력해 주세요."
-              {...register('name', { required: '이름을 입력해주세요' })}
+              placeholder={t('placeholders.name')}
+              {...register('name', { required: t('errors.required') })}
               error={errors.name?.message}
             />
-            <p className="text-xs text-gray-400">
-              예약 캘린더에 노출할 이름을 입력해 주세요.
-            </p>
+            <p className="text-xs text-gray-400">{t('helpers.name')}</p>
           </div>
-
-          {/* Salon Name (Added back as likely needed by backend even if not in crop?) 
-              User image didn't show it but "Register Owner" usually needs Salon Name.
-              I'll keep it but make it minimal or put it after Name.
-              Actually image doesn't show Salon Name. 
-              Maybe user wants ONLY what's in image?
-              But registration requires Salon creation.
-              I will assume it's necessary or maybe it's "Name" of salon?
-              "Name" field says "Name to show on calendar". Could be Owner Name or Salon Name?
-              Usually Calendar shows Stylist Name.
-              But where is Salon Name input?
-              I'll keep Salon Name input to be safe, maybe below Name, 
-              or interpret "Name" as Salon Name? No, "Name (Owner Name)" usually.
-              I will Add Salon Name input matching the style.
-          */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-900">
-              매장 이름 <span className="text-red-500">*</span>
+              {t('salonName')} <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-2">
               <div className="flex-1">
                 <Input
-                  placeholder="매장 이름을 입력해 주세요."
+                  placeholder={t('placeholders.salonName')}
                   {...register('salonName', {
-                    required: '매장 이름을 입력해주세요',
+                    required: t('errors.required'),
                   })}
                   error={errors.salonName?.message}
                 />
@@ -370,7 +377,7 @@ export default function RegisterPageView() {
                 {salonNameStatus === 'checking' ? (
                   <Loader2 className="animate-spin w-4 h-4" />
                 ) : (
-                  '중복확인'
+                  t('checkDuplicate')
                 )}
               </Button>
             </div>
@@ -382,14 +389,9 @@ export default function RegisterPageView() {
               </p>
             )}
           </div>
-
-          {/* Industry Selection (Hidden in image but required by backend?) 
-               I'll keep it but minimal or default?
-               Image is a partial crop. I should keep functional fields.
-           */}
           <div>
             <label className="block text-sm font-medium text-gray-900 mb-2">
-              업종 <span className="text-red-500">*</span>
+              {t('industry')} <span className="text-red-500">*</span>
             </label>
             <div className="grid grid-cols-2 gap-2">
               {INDUSTRIES.map((ind) => {
@@ -409,11 +411,10 @@ export default function RegisterPageView() {
               })}
             </div>
           </div>
-
           {/* Phone Verification */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-900">
-              휴대폰 인증 <span className="text-red-500">*</span>
+              {t('phone')} <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-2">
               <div className="w-[100px]">
@@ -427,7 +428,7 @@ export default function RegisterPageView() {
               </div>
               <div className="flex-1">
                 <Input
-                  placeholder="휴대폰 번호를 입력해 주세요."
+                  placeholder={t('placeholders.phone')}
                   {...register('phone', { required: true })}
                   disabled={otpSent}
                 />
@@ -439,13 +440,16 @@ export default function RegisterPageView() {
                 disabled={otpLoading || otpSent}
                 className="h-[42px] min-w-[60px]"
               >
-                {otpSent ? '재전송' : '전송'}
+                {otpSent ? t('resendOtp') : t('sendOtp')}
               </Button>
             </div>
 
             {otpSent && !otpVerified && (
               <div className="flex gap-2 mt-2">
-                <Input placeholder="인증번호 6자리" {...register('otp')} />
+                <Input
+                  placeholder={t('placeholders.otp')}
+                  {...register('otp')}
+                />
                 <Button
                   type="button"
                   onClick={handleVerifyOtp}
@@ -453,29 +457,20 @@ export default function RegisterPageView() {
                   variant="primary"
                   className="h-[42px]"
                 >
-                  확인
+                  {t('verifyOtp')}
                 </Button>
               </div>
             )}
             {otpVerified && (
               <p className="text-sm text-green-600 mt-1">
-                인증이 완료되었습니다.
+                {t('success.otpVerified')}
               </p>
             )}
           </div>
 
           <div className="pt-6">
             <p className="text-xs text-gray-500 text-center mb-4">
-              공비서 원장님 회원가입을 완료하면 공비서 원장님, 공비서스토어의
-              <br />
-              <span className="underline cursor-pointer">
-                통합 서비스 이용약관
-              </span>{' '}
-              및{' '}
-              <span className="underline cursor-pointer">
-                개인정보 처리방침
-              </span>
-              에 동의하신 것으로 간주합니다.
+              {t('helpers.agreement')}
             </p>
             <Button
               type="submit"
@@ -488,7 +483,7 @@ export default function RegisterPageView() {
                 color: otpVerified ? '#fff' : '#9CA3AF',
               }}
             >
-              회원가입 완료
+              {t('submit')}
             </Button>
           </div>
         </form>

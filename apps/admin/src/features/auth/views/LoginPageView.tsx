@@ -2,13 +2,21 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/store/authStore';
-import { useLogin } from '@/features/auth/hooks/useAuth';
+import { useLogin } from '../hooks/useAuth';
 import { Scissors } from 'lucide-react';
 import { ApiResponse, User } from '@/types';
+import LanguageSwitcher from '@/components/common/LanguageSwitcher';
+import { useTranslations } from 'next-intl';
+
+interface LoginResponse {
+  user: User;
+  token: string;
+}
 
 interface LoginForm {
   email: string;
@@ -16,13 +24,9 @@ interface LoginForm {
   rememberMe: boolean;
 }
 
-interface LoginResponse {
-  user: User;
-  token: string;
-}
-
 export default function LoginPageView() {
   const router = useRouter();
+  const t = useTranslations('auth.login');
   const { login } = useAuthStore();
   const [error, setError] = useState('');
 
@@ -57,7 +61,8 @@ export default function LoginPageView() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary-50 to-secondary-100 px-4 relative">
+      <LanguageSwitcher className="absolute top-4 right-4" />
       <div className="max-w-md w-full">
         {/* Logo */}
         <div className="text-center mb-8">
@@ -65,13 +70,13 @@ export default function LoginPageView() {
             <Scissors className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-secondary-900">Salon Admin</h1>
-          <p className="text-secondary-600 mt-2">살롱 예약 관리 시스템</p>
+          <p className="text-secondary-600 mt-2">{t('subtitle')}</p>
         </div>
 
         {/* Login form */}
         <div className="bg-white rounded-lg shadow-xl p-8">
           <h2 className="text-2xl font-semibold text-secondary-900 mb-6">
-            로그인
+            {t('title')}
           </h2>
 
           {error && (
@@ -82,25 +87,25 @@ export default function LoginPageView() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input
-              label="아이디 또는 이메일"
+              label={t('idOrEmail')}
               type="text"
-              placeholder="staff01 또는 email@example.com"
+              placeholder={t('placeholders.idOrEmail')}
               {...register('email', {
-                required: '아이디 또는 이메일을 입력해주세요',
+                required: t('errors.requiredId'),
                 // Remove strict email pattern to allow username
               })}
               error={errors.email?.message}
             />
 
             <Input
-              label="비밀번호"
+              label={t('password')}
               type="password"
-              placeholder="••••••••"
+              placeholder={t('placeholders.password')}
               {...register('password', {
-                required: '비밀번호를 입력해주세요',
+                required: t('errors.requiredPassword'),
                 minLength: {
                   value: 6,
-                  message: '비밀번호는 최소 6자 이상이어야 합니다',
+                  message: t('errors.minPassword'),
                 },
               })}
               error={errors.password?.message}
@@ -114,7 +119,7 @@ export default function LoginPageView() {
                   className="w-4 h-4 text-primary-600 border-secondary-300 rounded focus:ring-primary-500"
                 />
                 <span className="ml-2 text-sm text-secondary-700">
-                  로그인 상태 유지
+                  {t('rememberMe')}
                 </span>
               </label>
 
@@ -122,7 +127,7 @@ export default function LoginPageView() {
                 href="/forgot-password"
                 className="text-sm text-primary-600 hover:text-primary-700"
               >
-                비밀번호 찾기
+                {t('forgotPassword')}
               </a>
             </div>
 
@@ -132,18 +137,18 @@ export default function LoginPageView() {
               className="w-full"
               isLoading={loginMutation.isPending}
             >
-              로그인
+              {t('submit')}
             </Button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-secondary-600">
-              계정이 없으신가요?{' '}
+              {t('noAccount')}{' '}
               <a
                 href="/register"
                 className="text-primary-600 hover:text-primary-700 font-medium"
               >
-                회원가입
+                {t('registerLink')}
               </a>
             </p>
           </div>
