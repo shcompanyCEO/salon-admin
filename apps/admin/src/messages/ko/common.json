@@ -1,0 +1,16 @@
+{
+  "save": "저장",
+  "cancel": "취소",
+  "edit": "수정",
+  "delete": "삭제",
+  "search": "검색",
+  "add": "추가",
+  "submit": "제출",
+  "confirm": "확인",
+  "back": "뒤로",
+  "next": "다음",
+  "loading": "로딩 중...",
+  "error": "오류가 발생했습니다",
+  "success": "성공",
+  "noData": "데이터가 없습니다"
+}

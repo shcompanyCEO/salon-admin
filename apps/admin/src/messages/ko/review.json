@@ -1,0 +1,8 @@
+{
+  "title": "리뷰 관리",
+  "rating": "평점",
+  "comment": "내용",
+  "response": "답변",
+  "addResponse": "답변 작성",
+  "noResponse": "답변 없음"
+}

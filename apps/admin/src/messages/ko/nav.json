@@ -1,0 +1,13 @@
+{
+  "dashboard": "대시보드",
+  "bookings": "예약 관리",
+  "customers": "고객 관리",
+  "menus": "메뉴 관리",
+  "reviews": "리뷰 관리",
+  "sales": "매출 관리",
+  "chat": "채팅",
+  "settings": "설정",
+  "users": "사용자 관리",
+  "staff": "직원 관리",
+  "salons": "살롱 관리"
+}

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
-import { useTranslation } from '@/locales/useTranslation';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { Staff } from '../types';
 import { useStaff } from '../hooks/useStaff';
@@ -12,7 +12,7 @@ import InviteStaffModal from './components/InviteStaffModal';
 import StaffPermissionModal from './components/StaffPermissionModal';
 
 export default function StaffPageView() {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const { user } = useAuthStore();
   const {
     data: response,

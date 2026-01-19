@@ -1,0 +1,14 @@
+{
+  "title": "Sales Management",
+  "totalRevenue": "Total Revenue",
+  "totalBookings": "Total Bookings",
+  "period": "Period",
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly",
+  "custom": "Custom",
+  "byMenu": "By Service",
+  "byStaff": "By Designer",
+  "startDate": "Start Date",
+  "endDate": "End Date"
+}

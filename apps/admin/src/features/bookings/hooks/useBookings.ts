@@ -22,8 +22,11 @@ export const useBookings = (
   });
 
   const createBookingMutation = useMutation({
-    mutationFn: ({ booking }: { booking: Partial<Booking> }) =>
-      bookingsApi.createBooking(salonId, booking),
+    mutationFn: ({
+      booking,
+    }: {
+      booking: Omit<Booking, 'id' | 'createdAt' | 'updatedAt'>;
+    }) => bookingsApi.createBooking(salonId, booking),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['bookings', salonId] });
     },

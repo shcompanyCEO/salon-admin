@@ -1,0 +1,19 @@
+{
+  "title": "จัดการร้านเสริมสวย",
+  "name": "ชื่อร้าน",
+  "category": "ประเภท",
+  "description": "คำอธิบาย",
+  "address": "ที่อยู่",
+  "phone": "โทรศัพท์",
+  "email": "อีเมล",
+  "businessHours": "เวลาทำการ",
+  "wifi": "มี WiFi",
+  "parking": "มีที่จอดรถ",
+  "approved": "อนุมัติแล้ว",
+  "pending": "รออนุมัติ",
+  "hair": "ทำผม",
+  "nail": "ทำเล็บ",
+  "makeup": "แต่งหน้า",
+  "massage": "นวด",
+  "clinic": "คลินิก"
+}

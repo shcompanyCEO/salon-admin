@@ -1,0 +1,14 @@
+{
+  "title": "메뉴 관리",
+  "name": "메뉴명",
+  "type": "타입",
+  "price": "가격",
+  "duration": "소요 시간",
+  "description": "설명",
+  "cut": "커트",
+  "color": "염색",
+  "perm": "펌",
+  "clinic": "클리닉",
+  "treatment": "트리트먼트",
+  "addMenu": "메뉴 추가"
+}

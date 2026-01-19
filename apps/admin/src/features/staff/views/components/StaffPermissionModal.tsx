@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Staff, StaffPermission } from '../../types';
-import { useTranslation } from '@/locales/useTranslation';
+import { useTranslations } from 'next-intl';
 import { X } from 'lucide-react';
 
 interface StaffPermissionModalProps {
@@ -29,7 +29,7 @@ export default function StaffPermissionModal({
   staff,
   onSave,
 }: StaffPermissionModalProps) {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const [permissions, setPermissions] = useState<StaffPermission[]>([]);
   const [isSaving, setIsSaving] = useState(false);
 

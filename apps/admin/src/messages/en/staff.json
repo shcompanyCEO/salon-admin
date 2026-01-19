@@ -1,0 +1,13 @@
+{
+  "title": "Employee Management",
+  "name": "Name",
+  "experience": "Experience",
+  "specialties": "Specialties",
+  "rating": "Rating",
+  "reviews": "Reviews",
+  "status": "Status",
+  "active": "Active",
+  "inactive": "Inactive",
+  "permissions": "Permissions",
+  "addStaff": "Add Employee"
+}

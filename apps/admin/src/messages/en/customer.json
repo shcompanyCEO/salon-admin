@@ -1,0 +1,11 @@
+{
+  "title": "Customer Management",
+  "customerNumber": "Customer No.",
+  "name": "Name",
+  "phone": "Phone",
+  "email": "Email",
+  "notes": "Notes",
+  "lastVisit": "Last Visit",
+  "totalVisits": "Total Visits",
+  "addCustomer": "Add Customer"
+}

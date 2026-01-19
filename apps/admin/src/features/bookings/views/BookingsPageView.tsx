@@ -10,7 +10,7 @@ import { Modal } from '@/components/ui/Modal';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Calendar } from '@/components/ui/Calendar';
-import { useTranslation } from '@/locales/useTranslation';
+import { useTranslations } from 'next-intl';
 import { BookingStatus } from '@/types';
 import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
@@ -19,7 +19,7 @@ import { formatDate, formatPrice } from '@/lib/utils';
 import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
 
 export default function BookingsPageView() {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const { user } = useAuthStore();
 
   // Use new hook

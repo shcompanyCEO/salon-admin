@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { Layout } from '@/components/layout/Layout';
 import { Card } from '@/components/ui/Card';
-import { useTranslation } from '@/locales/useTranslation';
+import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { useUser } from '@/features/auth/hooks/useAuth';
 import {
@@ -28,7 +28,7 @@ interface Stats {
 }
 
 export default function DashboardPage() {
-  const { t } = useTranslation();
+  const t = useTranslations();
   const { data: user, isLoading } = useUser();
   // const { user } = useAuthStore(); // Replaced by useUser
   const [stats, setStats] = useState<Stats>({

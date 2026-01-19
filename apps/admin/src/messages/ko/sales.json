@@ -1,0 +1,14 @@
+{
+  "title": "매출 관리",
+  "totalRevenue": "총 매출",
+  "totalBookings": "총 예약",
+  "period": "기간",
+  "daily": "일별",
+  "weekly": "주별",
+  "monthly": "월별",
+  "custom": "사용자 지정",
+  "byMenu": "메뉴별",
+  "byStaff": "직원별",
+  "startDate": "시작일",
+  "endDate": "종료일"
+}

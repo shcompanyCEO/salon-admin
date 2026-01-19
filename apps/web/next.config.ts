@@ -1,7 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  transpilePackages: ["@salon-admin/api-core", "@salon-admin/supabase"],
 };
 
 export default nextConfig;

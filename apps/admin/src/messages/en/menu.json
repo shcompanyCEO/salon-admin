@@ -1,0 +1,14 @@
+{
+  "title": "Service Management",
+  "name": "Service Name",
+  "type": "Type",
+  "price": "Price",
+  "duration": "Duration",
+  "description": "Description",
+  "cut": "Cut",
+  "color": "Color",
+  "perm": "Perm",
+  "clinic": "Clinic",
+  "treatment": "Treatment",
+  "addMenu": "Add Service"
+}

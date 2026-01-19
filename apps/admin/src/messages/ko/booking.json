@@ -1,0 +1,21 @@
+{
+  "title": "예약 관리",
+  "new": "새 예약",
+  "status": "상태",
+  "pending": "대기",
+  "confirmed": "확인됨",
+  "cancelled": "취소됨",
+  "completed": "완료됨",
+  "noShow": "노쇼",
+  "customer": "고객",
+  "designer": "직원",
+  "service": "서비스",
+  "date": "날짜",
+  "time": "시간",
+  "price": "가격",
+  "notes": "메모",
+  "source": "예약 경로",
+  "online": "온라인",
+  "phone": "전화",
+  "walkIn": "직접 방문"
+}

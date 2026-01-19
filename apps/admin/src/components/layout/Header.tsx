@@ -4,22 +4,23 @@ import React from 'react';
 import { Menu, Bell, Globe, LogOut } from 'lucide-react';
 import { useUIStore } from '@/store/uiStore';
 import { useLogout } from '@/features/auth/hooks/useAuth';
-import { useTranslation } from '@/locales/useTranslation';
-import { Locale } from '@/types';
-import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
+import { useRouter, usePathname } from '@/i18n/routing';
 
 export const Header: React.FC = () => {
-  const { toggleSidebar, locale, setLocale } = useUIStore();
-  const { t } = useTranslation();
+  const { toggleSidebar } = useUIStore();
+  const t = useTranslations();
+  const locale = useLocale();
   const router = useRouter();
+  const pathname = usePathname();
 
   const [showLangMenu, setShowLangMenu] = React.useState(false);
   const [showNotifications, setShowNotifications] = React.useState(false);
 
   const languages = [
-    { code: 'ko' as Locale, name: '한국어' },
-    { code: 'en' as Locale, name: 'English' },
-    { code: 'th' as Locale, name: 'ภาษาไทย' },
+    { code: 'ko', name: '한국어' },
+    { code: 'en', name: 'English' },
+    { code: 'th', name: 'ภาษาไทย' },
   ];
 
   const logoutMutation = useLogout({
@@ -61,7 +62,7 @@ export const Header: React.FC = () => {
                 <button
                   key={lang.code}
                   onClick={() => {
-                    setLocale(lang.code);
+                    router.replace(pathname, { locale: lang.code });
                     setShowLangMenu(false);
                   }}
                   className={`w-full text-left px-4 py-2 text-sm hover:bg-secondary-100 transition-colors ${

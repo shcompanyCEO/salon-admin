@@ -1,0 +1,21 @@
+{
+  "title": "Booking Management",
+  "new": "New Booking",
+  "status": "Status",
+  "pending": "Pending",
+  "confirmed": "Confirmed",
+  "cancelled": "Cancelled",
+  "completed": "Completed",
+  "noShow": "No Show",
+  "customer": "Customer",
+  "designer": "Designer",
+  "service": "Service",
+  "date": "Date",
+  "time": "Time",
+  "price": "Price",
+  "notes": "Notes",
+  "source": "Source",
+  "online": "Online",
+  "phone": "Phone",
+  "walkIn": "Walk-in"
+}

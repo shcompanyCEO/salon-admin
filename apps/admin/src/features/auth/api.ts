@@ -12,6 +12,8 @@ import {
   RegisterOwnerParams,
   CheckDuplicateParams,
   CheckDuplicateResponse,
+  LoginParams,
+  RegisterParams,
 } from './types';
 
 export const createAuthApi = (client: SupabaseClient<any>) => {
@@ -32,7 +34,7 @@ export const createAuthApi = (client: SupabaseClient<any>) => {
     },
 
     // Wrappers for lib/auth.ts
-    login: async ({ email, password }: any) => {
+    login: async ({ email, password }: LoginParams) => {
       return signInWithEmail(email, password);
     },
 
@@ -40,7 +42,7 @@ export const createAuthApi = (client: SupabaseClient<any>) => {
       return signOut();
     },
 
-    register: async (params: any) => {
+    register: async (params: RegisterParams) => {
       // Note: lib/auth signUpWithEmail exists but registerOwner is used for owners?
       // mutations.ts had useRegister using /auth/register?
       // lib/api/mutations.ts: useRegister -> apiClient.post('/auth/register')
@@ -49,7 +51,7 @@ export const createAuthApi = (client: SupabaseClient<any>) => {
       return signUpWithEmail(params.email, params.password, {
         name: params.name,
         phone: params.phone,
-        role: params.role,
+        role: params.role as any, // casting as any because UserRole might need type alignment
       });
     },
 

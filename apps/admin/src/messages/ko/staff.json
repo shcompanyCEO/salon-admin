@@ -1,0 +1,13 @@
+{
+  "title": "직원 관리",
+  "name": "이름",
+  "experience": "경력",
+  "specialties": "전문 분야",
+  "rating": "평점",
+  "reviews": "리뷰",
+  "status": "상태",
+  "active": "활성",
+  "inactive": "비활성",
+  "permissions": "권한",
+  "addStaff": "직원 추가"
+}

@@ -1,0 +1,19 @@
+{
+  "title": "Salon Management",
+  "name": "Salon Name",
+  "category": "Category",
+  "description": "Description",
+  "address": "Address",
+  "phone": "Phone",
+  "email": "Email",
+  "businessHours": "Business Hours",
+  "wifi": "WiFi Available",
+  "parking": "Parking Available",
+  "approved": "Approved",
+  "pending": "Pending",
+  "hair": "Hair",
+  "nail": "Nail",
+  "makeup": "Makeup",
+  "massage": "Massage",
+  "clinic": "Clinic"
+}

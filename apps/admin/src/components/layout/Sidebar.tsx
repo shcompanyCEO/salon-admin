@@ -1,8 +1,6 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   Calendar,
@@ -14,24 +12,25 @@ import {
   MessageSquare,
   Settings,
   Building2,
-  UserCog,
-  Menu,
   Briefcase,
+  Menu,
   X,
   ChevronDown,
   ChevronRight,
+  LucideIcon,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useUIStore } from '@/store/uiStore';
 import { useAuthStore } from '@/store/authStore';
-import { useTranslation } from '@/locales/useTranslation';
+import { useTranslations } from 'next-intl';
+import { Link, usePathname } from '@/i18n/routing';
 import { UserRole } from '@/types';
 
 export const Sidebar: React.FC = () => {
   const pathname = usePathname();
   const { isSidebarOpen, toggleSidebar } = useUIStore();
   const { user } = useAuthStore();
-  const { t } = useTranslation();
+  const t = useTranslations();
 
   const [openSubmenus, setOpenSubmenus] = React.useState<string[]>([
     'salon-management',
@@ -47,7 +46,7 @@ export const Sidebar: React.FC = () => {
 
   interface MenuItem {
     name: string;
-    icon: any;
+    icon: LucideIcon;
     href?: string;
     roles: UserRole[];
     subItems?: MenuItem[];

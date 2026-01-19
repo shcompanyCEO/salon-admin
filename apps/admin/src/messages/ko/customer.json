@@ -1,0 +1,11 @@
+{
+  "title": "고객 관리",
+  "customerNumber": "고객 번호",
+  "name": "이름",
+  "phone": "전화번호",
+  "email": "이메일",
+  "notes": "메모",
+  "lastVisit": "마지막 방문",
+  "totalVisits": "총 방문 횟수",
+  "addCustomer": "고객 추가"
+}
