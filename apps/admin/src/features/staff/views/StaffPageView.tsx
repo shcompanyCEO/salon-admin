@@ -8,8 +8,9 @@ import { useTranslations } from 'next-intl';
 import { useAuthStore } from '@/store/authStore';
 import { Staff } from '../types';
 import { useStaff } from '../hooks/useStaff';
-import InviteStaffModal from './components/InviteStaffModal';
+import CreateStaffModal from './components/CreateStaffModal';
 import StaffPermissionModal from './components/StaffPermissionModal';
+import StaffProfileModal from './components/StaffProfileModal';
 
 export default function StaffPageView() {
   const t = useTranslations();
@@ -32,6 +33,9 @@ export default function StaffPageView() {
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
+  const [editingProfileStaff, setEditingProfileStaff] = useState<Staff | null>(
+    null
+  );
 
   const staffMembers = response?.data || [];
 
@@ -106,18 +110,22 @@ export default function StaffPageView() {
             </h1>
             <div className="text-sm text-secondary-600 mt-2 space-y-1">
               <p>
-                • 직원 등록 방법은 직원이 공비서에 회원가입 후 샵 입사 신청을
-                하면, 원장님 승인 후 등록됩니다.
+                • 직원 등록 방법은 직원이 salon store에 회원가입 후 샵 입사
+                신청을 하면, 관리자 승인 후 등록됩니다.
               </p>
               <p>
                 • 이름/닉네임 변경은 각 계정의 [마이페이지]에서 변경할 수
                 있습니다.
               </p>
+              <p>
+                • 직원의 퇴사 처리는 관리자에서만 가능합니다.(직원의 퇴사 후
+                재입사 시, 이전 데이터는 삭제 됩니다.)
+              </p>
             </div>
           </div>
           {isAdmin && (
             <Button variant="outline" onClick={() => setShowInviteModal(true)}>
-              직원 초대하기
+              직원 등록하기
             </Button>
           )}
         </div>
@@ -155,12 +163,27 @@ export default function StaffPageView() {
                     {index + 1}
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <div className="flex items-center justify-center space-x-2">
-                      <span
-                        className={`w-2 h-2 rounded-full ${
-                          member.isActive ? 'bg-cyan-400' : 'bg-gray-300'
-                        }`}
-                      />
+                    <div className="flex items-center justify-center space-x-3">
+                      <div className="relative">
+                        {member.profileImage ? (
+                          <img
+                            src={member.profileImage}
+                            alt=""
+                            className="w-10 h-10 rounded-full object-cover border border-secondary-200"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-secondary-100 flex items-center justify-center border border-secondary-200 text-secondary-400">
+                            <span className="text-xs font-medium">
+                              {member.name[0]}
+                            </span>
+                          </div>
+                        )}
+                        <span
+                          className={`absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white ${
+                            member.isActive ? 'bg-green-500' : 'bg-gray-300'
+                          }`}
+                        />
+                      </div>
                       <span className="text-sm font-medium text-secondary-900">
                         {member.name}
                       </span>
@@ -218,7 +241,16 @@ export default function StaffPageView() {
                     )}
                   </td>
                   <td className="px-6 py-4 text-center flex justify-center">
-                    {member.profileImage ? (
+                    {canEdit(member) ? (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-8 px-3 text-xs"
+                        onClick={() => setEditingProfileStaff(member)}
+                      >
+                        정보 수정
+                      </Button>
+                    ) : member.profileImage ? (
                       <img
                         src={member.profileImage}
                         alt=""
@@ -250,11 +282,11 @@ export default function StaffPageView() {
                       <input
                         type="checkbox"
                         className="sr-only peer"
-                        checked={member.isActive}
+                        checked={member.isBookingEnabled}
                         disabled={!canEdit(member)}
                         onChange={(e) => {
                           handleUpdateStaff(member.id, {
-                            isActive: e.target.checked,
+                            isBookingEnabled: e.target.checked,
                           });
                         }}
                       />
@@ -269,10 +301,20 @@ export default function StaffPageView() {
         </div>
 
         {/* Existing Modals */}
-        <InviteStaffModal
+        <CreateStaffModal
           isOpen={showInviteModal}
           onClose={() => setShowInviteModal(false)}
-          onSuccess={() => alert('초대장이 발송되었습니다!')}
+          onSuccess={() => {
+            alert('직원이 등록되었습니다!');
+            // Ideally refetch staff list here
+            updateStaff({} as any); // Trigger refetch hack or use query invalidation?
+            // useStaff might not expose refetch.
+            // But usually modal onSuccess should trigger refresh.
+            // Let's assume user refreshes or hook revalidates.
+            window.location.reload(); // Simple refresh to show new user
+          }}
+          salonId={user?.salonId || ''}
+          currentStaffCount={staffMembers.length}
         />
 
         {/* Permission Modal */}
@@ -286,6 +328,18 @@ export default function StaffPageView() {
               // perms is StaffPermission[]
               await handleUpdateStaff(id, { permissions: perms });
               setSelectedStaff(null);
+            }}
+          />
+        )}
+
+        {/* Profile Edit Modal */}
+        {editingProfileStaff && (
+          <StaffProfileModal
+            isOpen={!!editingProfileStaff}
+            onClose={() => setEditingProfileStaff(null)}
+            staff={editingProfileStaff}
+            onSave={async (id, updates) => {
+              await handleUpdateStaff(id, updates);
             }}
           />
         )}

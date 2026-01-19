@@ -49,7 +49,11 @@ export default function LoginPageView() {
 
   const onSubmit = async (data: LoginForm) => {
     setError('');
-    loginMutation.mutate({ email: data.email, password: data.password });
+    let finalEmail = data.email;
+    if (!finalEmail.includes('@')) {
+      finalEmail = `${data.email}@salon.local`;
+    }
+    loginMutation.mutate({ email: finalEmail, password: data.password });
   };
 
   return (
@@ -78,15 +82,12 @@ export default function LoginPageView() {
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <Input
-              label="이메일"
-              type="email"
-              placeholder="email@example.com"
+              label="아이디 또는 이메일"
+              type="text"
+              placeholder="staff01 또는 email@example.com"
               {...register('email', {
-                required: '이메일을 입력해주세요',
-                pattern: {
-                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                  message: '올바른 이메일 형식이 아닙니다',
-                },
+                required: '아이디 또는 이메일을 입력해주세요',
+                // Remove strict email pattern to allow username
               })}
               error={errors.email?.message}
             />

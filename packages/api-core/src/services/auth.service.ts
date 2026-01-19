@@ -15,4 +15,18 @@ export class AuthService {
   async registerOwner(params: any) {
     return this.repository.registerOwner(params);
   }
+
+  async sendOtp(phone: string) {
+    return this.client.auth.signInWithOtp({
+      phone,
+    });
+  }
+
+  async verifyOtp(phone: string, token: string) {
+    return this.client.auth.verifyOtp({
+      phone,
+      token,
+      type: "sms",
+    });
+  }
 }

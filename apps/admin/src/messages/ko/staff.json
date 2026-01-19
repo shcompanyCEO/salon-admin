@@ -9,5 +9,6 @@
   "active": "활성",
   "inactive": "비활성",
   "permissions": "권한",
-  "addStaff": "직원 추가"
+  "addStaff": "직원 추가",
+  "profile": "프로필 수정"
 }

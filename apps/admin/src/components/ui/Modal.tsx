@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -56,7 +57,7 @@ export const Modal: React.FC<ModalProps> = ({
     xl: 'max-w-4xl',
   };
 
-  return (
+  const modalContent = (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
@@ -100,4 +101,11 @@ export const Modal: React.FC<ModalProps> = ({
       </div>
     </div>
   );
+
+  // Use Portal to render at document body level
+  if (typeof document !== 'undefined') {
+    return ReactDOM.createPortal(modalContent, document.body);
+  }
+
+  return null;
 };

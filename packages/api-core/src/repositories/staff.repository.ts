@@ -24,13 +24,16 @@ export class StaffRepository extends BaseRepository {
           bio,
           years_of_experience,
           specialties,
-          permissions
+          social_links,
+          permissions,
+          is_booking_enabled
         )
-      `
+      `,
       )
       .eq("salon_id", salonId)
       .in("role", ["SUPER_ADMIN", "ADMIN", "MANAGER", "STAFF"])
-      .eq("is_active", true);
+      .eq("is_active", true)
+      .order("created_at", { ascending: true });
 
     if (error) {
       throw new Error(error.message);
@@ -43,8 +46,28 @@ export class StaffRepository extends BaseRepository {
     return users.map(this.transformToStaff);
   }
 
+  async getStaffCount(salonId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from("users")
+      .select("*", { count: "exact", head: true })
+      .eq("salon_id", salonId)
+      .in("role", ["ADMIN", "MANAGER", "STAFF"]);
+
+    if (error) throw new Error(error.message);
+    return count || 0;
+  }
+
   async updateStaff(salonId: string, staffId: string, updates: any) {
     const profileUpdates: any = {};
+
+    // Handle password update
+    if (updates.password) {
+      const { error: authError } =
+        await this.supabase.auth.admin.updateUserById(staffId, {
+          password: updates.password,
+        });
+      if (authError) throw authError;
+    }
 
     // Handle permissions update
     if (updates.permissions) {
@@ -65,11 +88,31 @@ export class StaffRepository extends BaseRepository {
       }
     }
 
-    // Handle other updates if needed (e.g. isActive)
-    if (typeof updates.isActive !== "undefined") {
-      // Users table update needed for isActive
+    // Handle isBookingEnabled update
+    if (typeof updates.isBookingEnabled !== "undefined") {
+      profileUpdates.is_booking_enabled = updates.isBookingEnabled;
+    }
+
+    // Handle extended profile fields
+    if (updates.description) profileUpdates.bio = updates.description;
+    if (typeof updates.experience !== "undefined")
+      profileUpdates.years_of_experience = updates.experience;
+    if (updates.specialties) profileUpdates.specialties = updates.specialties;
+    if (updates.socialLinks) profileUpdates.social_links = updates.socialLinks;
+
+    // Handle other updates if needed (e.g. isActive, name, phone, profileImage)
+    const userUpdates: any = {};
+    if (typeof updates.isActive !== "undefined")
+      userUpdates.is_active = updates.isActive;
+    if (updates.name) userUpdates.name = updates.name;
+    if (updates.phone) userUpdates.phone = updates.phone;
+    if (typeof updates.profileImage !== "undefined")
+      userUpdates.profile_image = updates.profileImage;
+
+    if (Object.keys(userUpdates).length > 0) {
+      // Users table update needed
       const { error: userError } = await (this.supabase.from("users") as any)
-        .update({ is_active: updates.isActive })
+        .update(userUpdates)
         .eq("id", staffId);
 
       if (userError) throw userError;
@@ -81,7 +124,7 @@ export class StaffRepository extends BaseRepository {
         this.supabase.from("staff_profiles") as any
       ).upsert(
         { user_id: staffId, ...profileUpdates },
-        { onConflict: "user_id" }
+        { onConflict: "user_id" },
       );
 
       if (profileError) throw profileError;
@@ -103,17 +146,19 @@ export class StaffRepository extends BaseRepository {
       profileImage: user.profile_image,
       portfolioImages: [],
       specialties: profile.specialties || [],
+      socialLinks: profile.social_links || {},
       rating: 0,
       reviewCount: 0,
 
       isActive: user.is_active,
+      isBookingEnabled: profile.is_booking_enabled ?? true,
       permissions: Object.entries(profile.permissions || {}).map(
         ([key, val]: [string, any]) => ({
           module: key,
           canRead: val.view || false,
           canWrite: val.edit || val.create || false,
           canDelete: val.delete || false,
-        })
+        }),
       ),
       createdAt: user.created_at,
       updatedAt: user.updated_at,

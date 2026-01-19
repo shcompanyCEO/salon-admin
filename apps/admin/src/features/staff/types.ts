@@ -7,6 +7,13 @@ export interface StaffPermission {
   canDelete: boolean;
 }
 
+export interface StaffSocialLinks {
+  instagram?: string;
+  youtube?: string;
+  tiktok?: string;
+  facebook?: string;
+}
+
 export interface Staff {
   id: string;
   userId: string;
@@ -17,9 +24,11 @@ export interface Staff {
   profileImage?: string;
   portfolioImages: string[];
   specialties: string[];
+  socialLinks?: StaffSocialLinks;
   rating: number;
   reviewCount: number;
   isActive: boolean;
+  isBookingEnabled: boolean;
   permissions: StaffPermission[];
   createdAt: Date;
   updatedAt: Date;

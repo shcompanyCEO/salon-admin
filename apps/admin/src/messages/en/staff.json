@@ -9,5 +9,6 @@
   "active": "Active",
   "inactive": "Inactive",
   "permissions": "Permissions",
-  "addStaff": "Add Employee"
+  "addStaff": "Add Employee",
+  "profile": "Edit Profile"
 }

@@ -14,6 +14,7 @@ import { useTranslations } from 'next-intl';
 import { BookingStatus } from '@/types';
 import { Booking } from '../types';
 import { useBookings } from '../hooks/useBookings';
+import { useStaff } from '../../staff/hooks/useStaff';
 import { useAuthStore } from '@/store/authStore';
 import { formatDate, formatPrice } from '@/lib/utils';
 import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
@@ -21,11 +22,24 @@ import { Plus, Calendar as CalendarIcon, Filter, List } from 'lucide-react';
 export default function BookingsPageView() {
   const t = useTranslations();
   const { user } = useAuthStore();
+  const salonId = user?.salonId || '';
 
   // Use new hook
-  const { data: response, isLoading } = useBookings(user?.salonId || '', {
-    enabled: !!user?.salonId,
+  const { data: response, isLoading } = useBookings(salonId, {
+    enabled: !!salonId,
   });
+
+  const { data: staffResponse } = useStaff(salonId, {
+    enabled: !!salonId,
+  });
+
+  const staffMembers = staffResponse?.data || [];
+  const designers = staffMembers
+    .filter((staff) => staff.isBookingEnabled)
+    .map((staff) => ({
+      value: staff.id,
+      label: staff.name,
+    }));
 
   const bookings = response || [];
 
@@ -221,11 +235,7 @@ export default function BookingsPageView() {
             />
             <Select
               label={t('booking.designer')}
-              options={[
-                { value: '', label: '전체' },
-                { value: 'd1', label: '김철수' },
-                { value: 'd2', label: '이영희' },
-              ]}
+              options={[{ value: '', label: '전체' }, ...designers]}
             />
             <div className="flex items-end">
               <Button variant="outline" className="w-full">
@@ -289,14 +299,7 @@ export default function BookingsPageView() {
             />
           </div>
 
-          <Select
-            label={t('booking.designer')}
-            required
-            options={[
-              { value: 'd1', label: '김철수' },
-              { value: 'd2', label: '이영희' },
-            ]}
-          />
+          <Select label={t('booking.designer')} required options={designers} />
 
           <Select
             label={t('booking.service')}

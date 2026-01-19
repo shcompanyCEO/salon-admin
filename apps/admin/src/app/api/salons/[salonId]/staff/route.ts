@@ -39,7 +39,9 @@ export async function POST(
     const body = await req.json();
     const { action, ...data } = body;
 
-    const supabase = createClient(req);
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+    const supabase = createSupabaseClient(supabaseUrl, supabaseKey);
 
     const service = new StaffService(supabase);
     let result;

@@ -5,6 +5,7 @@ export interface RegisterOwnerParams {
   salonName: string;
   phone: string;
   industryNames: string[];
+  userId?: string;
 }
 
 export interface CheckDuplicateParams {
