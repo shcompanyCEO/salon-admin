@@ -24,8 +24,7 @@ export const createAuthApi = (client: SupabaseClient<any>) => {
       type,
       value,
     }: CheckDuplicateParams): Promise<CheckDuplicateResponse> => {
-      const repoType = type === 'salonName' ? 'shop_name' : type;
-      const data = await service.checkDuplicate(repoType, value);
+      const data = await service.checkDuplicate(type, value);
       return data as CheckDuplicateResponse;
     },
 

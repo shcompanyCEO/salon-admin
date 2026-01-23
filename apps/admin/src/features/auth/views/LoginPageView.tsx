@@ -53,11 +53,7 @@ export default function LoginPageView() {
 
   const onSubmit = async (data: LoginForm) => {
     setError('');
-    let finalEmail = data.email;
-    if (!finalEmail.includes('@')) {
-      finalEmail = `${data.email}@salon.local`;
-    }
-    loginMutation.mutate({ email: finalEmail, password: data.password });
+    loginMutation.mutate({ email: data.email, password: data.password });
   };
 
   return (

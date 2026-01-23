@@ -6,15 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useForm } from 'react-hook-form';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import {
-  Scissors,
-  Check,
-  X,
-  Loader2,
-  Eye,
-  EyeOff,
-  ChevronLeft,
-} from 'lucide-react';
+import { Check, X, Loader2, Eye, EyeOff, ChevronLeft } from 'lucide-react';
 import LanguageSwitcher from '@/components/common/LanguageSwitcher';
 import { Select } from '@/components/ui/Select';
 import { CheckStatus } from '../types';
@@ -22,16 +14,8 @@ import { useRegistration } from '../hooks/useAuth';
 import { supabase } from '@/lib/supabase/client';
 import { User } from '@supabase/supabase-js';
 
-const INDUSTRIES = [
-  { label: '헤어샵', value: 'HAIR' },
-  { label: '네일샵', value: 'NAIL' },
-  { label: '에스테틱', value: 'ESTHETIC' },
-  { label: '마사지', value: 'MASSAGE' },
-  { label: '바버샵', value: 'BARBERSHOP' },
-];
-
 interface RegisterForm {
-  id: string; // User ID acting as email prefix
+  email: string; // Changed from id to email
   password: string;
   confirmPassword: string;
   name: string;
@@ -56,7 +40,6 @@ export default function RegisterPageView() {
   const [otpVerified, setOtpVerified] = useState(false);
   const [verifiedUser, setVerifiedUser] = useState<User | null>(null);
   const [otpLoading, setOtpLoading] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0); // Optional: Timer logic could be added
 
   const INDUSTRIES = [
     { label: tInd('HAIR'), value: 'HAIR' },
@@ -67,10 +50,10 @@ export default function RegisterPageView() {
   ];
 
   const {
+    emailStatus,
+    emailMessage,
     salonNameStatus,
     salonNameMessage,
-    setSalonNameStatus,
-    setSalonNameMessage,
     checkDuplicate,
     registerOwner,
   } = useRegistration();
@@ -91,7 +74,7 @@ export default function RegisterPageView() {
 
   const industryNames = watch('industryNames');
   const salonName = watch('salonName');
-  const userId = watch('id');
+  const email = watch('email');
   const phone = watch('phone');
   const countryCode = watch('countryCode');
   const otp = watch('otp');
@@ -112,29 +95,11 @@ export default function RegisterPageView() {
     type: 'email' | 'salonName',
     value: string
   ) => {
-    const isValid = await trigger(type === 'email' ? 'id' : 'salonName');
+    const isValid = await trigger(type === 'email' ? 'email' : 'salonName');
     if (!isValid) return;
 
-    if (type === 'email') {
-      // Check ID as email
-      await checkDuplicate('email', `${value}@salon.local`);
-    } else {
-      await checkDuplicate(type, value);
-    }
-  };
-
-  const getStatusIcon = (status: CheckStatus) => {
-    switch (status) {
-      case 'checking':
-        return <Loader2 className="w-4 h-4 animate-spin text-gray-500" />;
-      case 'available':
-        return <Check className="w-4 h-4 text-green-500" />;
-      case 'taken':
-      case 'error':
-        return <X className="w-4 h-4 text-red-500" />;
-      default:
-        return null;
-    }
+    // Direct check, no appending
+    await checkDuplicate(type, value);
   };
 
   const formattedPhone = () => {
@@ -207,9 +172,18 @@ export default function RegisterPageView() {
       return;
     }
 
+    if (emailStatus !== 'available') {
+      // Optional: Block if email not checked? Or rely on server error?
+      // Better to encourage check.
+      if (emailStatus === 'idle') {
+        await handleCheckDuplicate('email', data.email);
+        // After check, status updates asynchronously. This logic is tricky in React non-async state.
+        // For now, let generic error catch it or let user click button.
+      }
+    }
+
     if (salonNameStatus !== 'available') {
-      // Re-check logic if generic status isn't reliable or blocked
-      // But assuming status is managed by hook hooks correctly
+      // same logic
     }
 
     if (!data.industryNames || data.industryNames.length === 0) {
@@ -220,12 +194,10 @@ export default function RegisterPageView() {
     setIsLoading(true);
 
     try {
-      // Construct email from ID
-      const finalEmail = `${data.id}@salon.local`;
-
+      // Use real email
       await registerOwner({
-        userId: verifiedUser.id, // Pass existing user ID
-        email: finalEmail,
+        userId: verifiedUser.id,
+        email: data.email,
         password: data.password,
         name: data.name,
         salonName: data.salonName,
@@ -265,22 +237,46 @@ export default function RegisterPageView() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          {/* ID Input */}
+          {/* Email Input */}
           <div className="space-y-1">
             <label className="block text-sm font-medium text-gray-900">
               {t('id')} <span className="text-red-500">*</span>
             </label>
-            <Input
-              placeholder={t('placeholders.id')}
-              {...register('id', {
-                required: t('errors.required'),
-                pattern: {
-                  value: /^[a-z0-9]{4,20}$/,
-                  message: t('helpers.id'),
-                },
-              })}
-              error={errors.id?.message}
-            />
+            <div className="flex gap-2">
+              <div className="flex-1">
+                <Input
+                  placeholder={t('placeholders.id')}
+                  {...register('email', {
+                    required: t('errors.required'),
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: t('helpers.id'),
+                    },
+                  })}
+                  error={errors.email?.message}
+                />
+              </div>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => handleCheckDuplicate('email', email)}
+                disabled={emailStatus === 'checking' || !email}
+                className="h-[42px]"
+              >
+                {emailStatus === 'checking' ? (
+                  <Loader2 className="animate-spin w-4 h-4" />
+                ) : (
+                  t('checkDuplicate')
+                )}
+              </Button>
+            </div>
+            {emailMessage && (
+              <p
+                className={`text-xs ${emailStatus === 'available' ? 'text-green-600' : 'text-red-600'}`}
+              >
+                {emailMessage}
+              </p>
+            )}
             <p className="text-xs text-gray-400">{t('helpers.id')}</p>
           </div>
 
@@ -298,7 +294,7 @@ export default function RegisterPageView() {
                     required: t('errors.required'),
                     minLength: {
                       value: 8,
-                      message: t('helpers.password'), // Using helper text as error for simplicity or add specific error key
+                      message: t('helpers.password'),
                     },
                   })}
                   error={errors.password?.message}
@@ -363,6 +359,10 @@ export default function RegisterPageView() {
                   placeholder={t('placeholders.salonName')}
                   {...register('salonName', {
                     required: t('errors.required'),
+                    pattern: {
+                      value: /^[a-zA-Z0-9_가-힣]+$/,
+                      message: t('errors.salonNamePattern'),
+                    },
                   })}
                   error={errors.salonName?.message}
                 />

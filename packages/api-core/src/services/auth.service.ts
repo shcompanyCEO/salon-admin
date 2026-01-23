@@ -8,7 +8,10 @@ export class AuthService {
     this.repository = new AuthRepository(this.client);
   }
 
-  async checkDuplicate(type: "email" | "shop_name" | "phone", value: string) {
+  async checkDuplicate(
+    type: "email" | "shop_name" | "salonName" | "phone",
+    value: string,
+  ) {
     return this.repository.checkDuplicate(type, value);
   }
 
